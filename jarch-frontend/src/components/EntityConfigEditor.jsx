@@ -1,352 +1,164 @@
 import React, { useState } from 'react';
 import { JsonEditor } from 'json-edit-react';
 
-// Начальная конфигурация сущностей
-const initialEntityConfig = {
-    entities: []
-};
+const EntityConfigEditor = () => {
+    const [data, setData] = useState({
+        entities: []
+    });
 
-// Типы полей для выпадающего списка
-const fieldTypes = [
-    "String", "Integer", "Long", "Double", "Float", "Boolean", 
-    "LocalDate", "LocalDateTime", "LocalTime", "BigDecimal"
-];
+    const fieldTypesEnum = {
+        enum: "Field Type",
+        values: ["String", "Integer", "Long", "Double", "Float", "Boolean", "LocalDate", "LocalDateTime", "LocalTime", "BigDecimal"],
+        matchPriority: 1
+    };
 
-// Типы отношений
-const relationTypes = [
-    "ONE_TO_ONE", "ONE_TO_MANY", "MANY_TO_ONE", "MANY_TO_MANY"
-];
+    const relationTypesEnum = {
+        enum: "Relation Type",
+        values: ["ONE_TO_ONE", "ONE_TO_MANY", "MANY_TO_ONE", "MANY_TO_MANY"],
+        matchPriority: 1
+    };
 
-// Типы fetch
-const fetchTypes = ["LAZY", "EAGER"];
+    const fetchTypesEnum = {
+        enum: "Fetch Type",
+        values: ["LAZY", "EAGER"],
+        matchPriority: 1
+    };
 
-// Типы cascade
-const cascadeTypes = [
-    "PERSIST", "MERGE", "REMOVE", "REFRESH", "DETACH", "ALL"
-];
+    const cascadeTypesEnum = {
+        enum: "Cascade Type",
+        values: ["PERSIST", "MERGE", "REMOVE", "REFRESH", "DETACH", "ALL"],
+        matchPriority: 1
+    };
 
-const EntityConfigEditor = ({ onChange }) => {
-    const [config, setConfig] = useState(initialEntityConfig);
-    const [errors, setErrors] = useState({});
-
-    // При изменении конфигурации
-    const handleConfigChange = (newConfig) => {
-        setConfig(newConfig);
+    const restrictTypeSelection = (node) => {
+        const path = node.path ? node.path.join('.') : '';
+        const cleanPath = path.replace(/\[\d+\]/g, '[*]');
         
-        // Валидация
-        const validationErrors = {};
-        
-        // Проверяем, что у всех сущностей есть name
-        newConfig.entities.forEach((entity, index) => {
-            if (!entity.name) {
-                validationErrors[`entities[${index}].name`] = 'Имя сущности обязательно';
-            }
+        switch(true) {
+            case cleanPath.includes('name'):
+            case cleanPath.includes('description'):
+            case cleanPath.includes('targetEntity'):
+                return ['string'];
             
-            // Проверяем поля сущности
-            entity.fields?.forEach((field, fieldIndex) => {
-                if (!field.name) {
-                    validationErrors[`entities[${index}].fields[${fieldIndex}].name`] = 'Имя поля обязательно';
-                }
-                if (!field.type) {
-                    validationErrors[`entities[${index}].fields[${fieldIndex}].type`] = 'Тип поля обязателен';
-                }
-            });
-        });
-        
-        setErrors(validationErrors);
-        
-        // Если ошибок нет, вызываем onChange
-        if (Object.keys(validationErrors).length === 0 && onChange) {
-            onChange(newConfig);
+            case cleanPath.includes('required'):
+                return ['boolean'];
+            
+            case cleanPath.endsWith('type') && !cleanPath.includes('relation.type'):
+                return [fieldTypesEnum];
+            case cleanPath.endsWith('relation.type'):
+                return [relationTypesEnum];
+            case cleanPath.endsWith('fetchType'):
+                return [fetchTypesEnum];
+            case cleanPath.endsWith('cascadeType'):
+                return [cascadeTypesEnum];
+            
+            case cleanPath === 'entities':
+                return ['array'];
+            case cleanPath.endsWith('entities[*]'):
+            case cleanPath.endsWith('fields[*]'):
+            case cleanPath.endsWith('relation'):
+                return ['object'];
+            
+            default:
+                return false;
         }
     };
 
-    // Добавить новую сущность
+    // Простые функции для добавления
     const addEntity = () => {
-        const newEntity = {
-            name: "",
-            description: "",
-            fields: []
+        const newData = {
+            ...data,
+            entities: [
+                ...data.entities,
+                {
+                    name: `Entity${data.entities.length + 1}`,
+                    description: "",
+                    fields: []
+                }
+            ]
         };
-        
-        const newConfig = {
-            ...config,
-            entities: [...config.entities, newEntity]
-        };
-        
-        handleConfigChange(newConfig);
+        setData(newData);
     };
 
-    // Удалить сущность
-    const removeEntity = (index) => {
-        const newEntities = [...config.entities];
-        newEntities.splice(index, 1);
+    const addFieldToEntity = (entityIndex) => {
+        const newEntities = [...data.entities];
+        if (!newEntities[entityIndex].fields) {
+            newEntities[entityIndex].fields = [];
+        }
         
-        const newConfig = {
-            ...config,
-            entities: newEntities
-        };
-        
-        handleConfigChange(newConfig);
-    };
-
-    // Добавить поле к сущности
-    const addFieldToEntity = (entityIndex, isRelation = false) => {
-        const newEntities = [...config.entities];
-        
-        const newField = {
-            name: "",
-            type: "",
+        newEntities[entityIndex].fields.push({
+            name: `field${newEntities[entityIndex].fields.length + 1}`,
+            type: "String",
             description: "",
             required: false
-        };
+        });
         
-        if (isRelation) {
-            newField.relation = {
+        setData({ ...data, entities: newEntities });
+    };
+
+    const addRelatedFieldToEntity = (entityIndex) => {
+        const newEntities = [...data.entities];
+        if (!newEntities[entityIndex].fields) {
+            newEntities[entityIndex].fields = [];
+        }
+        
+        newEntities[entityIndex].fields.push({
+            name: `relatedField${newEntities[entityIndex].fields.length + 1}`,
+            type: "String",
+            description: "",
+            required: false,
+            relation: {
                 type: "MANY_TO_ONE",
                 targetEntity: "",
                 fetchType: "LAZY",
                 cascadeType: "PERSIST"
-            };
-        }
+            }
+        });
         
-        newEntities[entityIndex].fields = [
-            ...(newEntities[entityIndex].fields || []),
-            newField
-        ];
-        
-        const newConfig = {
-            ...config,
-            entities: newEntities
-        };
-        
-        handleConfigChange(newConfig);
-    };
-
-    // Удалить поле из сущности
-    const removeFieldFromEntity = (entityIndex, fieldIndex) => {
-        const newEntities = [...config.entities];
-        newEntities[entityIndex].fields.splice(fieldIndex, 1);
-        
-        const newConfig = {
-            ...config,
-            entities: newEntities
-        };
-        
-        handleConfigChange(newConfig);
-    };
-
-    // Заполнить примером
-    const fillExample = () => {
-        const exampleConfig = {
-            entities: [
-                {
-                    name: "userApp",
-                    description: "User entity representing system users",
-                    fields: [
-                        {
-                            name: "username",
-                            type: "String",
-                            description: "Unique username",
-                            required: true
-                        },
-                        {
-                            name: "email",
-                            type: "String",
-                            description: "User email address",
-                            required: true
-                        }
-                    ]
-                },
-                {
-                    name: "product",
-                    description: "Product entity for e-commerce",
-                    fields: [
-                        {
-                            name: "name",
-                            type: "String",
-                            description: "Product name",
-                            required: true
-                        },
-                        {
-                            name: "price",
-                            type: "Double",
-                            description: "Product price",
-                            required: true
-                        }
-                    ]
-                }
-            ]
-        };
-        setConfig(exampleConfig);
-        handleConfigChange(exampleConfig);
-    };
-
-    // Сброс
-    const resetConfig = () => {
-        setConfig(initialEntityConfig);
-        setErrors({});
-        if (onChange) onChange(initialEntityConfig);
-    };
-
-    // Обработчик обновления JSON
-    const handleUpdate = ({ newData }) => {
-        handleConfigChange(newData);
-        return true;
+        setData({ ...data, entities: newEntities });
     };
 
     return (
-        <div className="entity-config-editor">
-            <div className="editor-header">
-                <h3>entity-config.json</h3>
-                <div className="header-actions">
-                    <button onClick={addEntity} className="action-btn add-btn">
-                        ➕ Добавить сущность
-                    </button>
-                    <button onClick={fillExample} className="action-btn example-btn">
-                        📋 Заполнить примером
-                    </button>
-                    <button onClick={resetConfig} className="action-btn reset-btn">
-                        🗑️ Очистить
-                    </button>
-                </div>
-            </div>
-
-            {/* Ручное управление сущностями */}
-            <div className="entities-manual-control">
-                {config.entities.map((entity, entityIndex) => (
-                    <div key={entityIndex} className="entity-card">
-                        <div className="entity-card-header">
-                            <h4>
-                                Сущность #{entityIndex + 1}: 
-                                <span className="entity-name">
-                                    {entity.name || "Без имени"}
-                                </span>
-                            </h4>
-                            <button 
-                                onClick={() => removeEntity(entityIndex)}
-                                className="remove-btn"
-                            >
-                                ✖ Удалить
-                            </button>
-                        </div>
-                        
-                        <div className="entity-controls">
-                            <button 
-                                onClick={() => addFieldToEntity(entityIndex, false)}
-                                className="action-btn small-btn"
-                            >
-                                ➕ Обычное поле
-                            </button>
-                            <button 
-                                onClick={() => addFieldToEntity(entityIndex, true)}
-                                className="action-btn small-btn relation-btn"
-                            >
-                                🔗 Поле с отношением
-                            </button>
-                            
-                            <div className="fields-list">
-                                {entity.fields?.map((field, fieldIndex) => (
-                                    <div key={fieldIndex} className="field-item">
-                                        <span className="field-name">
-                                            {field.name || "Без имени"} ({field.type || "Без типа"})
-                                        </span>
-                                        <button 
-                                            onClick={() => removeFieldFromEntity(entityIndex, fieldIndex)}
-                                            className="remove-field-btn"
-                                        >
-                                            ✖
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+        <div>
+            <h1>Entity Configuration Editor</h1>
+            
+            <div style={{ marginBottom: '20px' }}>
+                <button onClick={addEntity} style={{ marginRight: '10px' }}>
+                    Add Entity
+                </button>
+                
+                {data.entities.map((entity, index) => (
+                    <div key={index} style={{ margin: '10px 0', padding: '10px', border: '1px solid #ccc' }}>
+                        <span>Entity {index + 1}: {entity.name}</span>
+                        <button 
+                            onClick={() => addFieldToEntity(index)} 
+                            style={{ marginLeft: '10px' }}
+                        >
+                            Add Field
+                        </button>
+                        <button 
+                            onClick={() => addRelatedFieldToEntity(index)} 
+                            style={{ marginLeft: '10px' }}
+                        >
+                            Add Related Field
+                        </button>
                     </div>
                 ))}
             </div>
-
-            <div className="editor-content">
-                <div className="json-editor-wrapper">
-                    <JsonEditor
-                        data={config}
-                        setData={handleConfigChange}
-                        onUpdate={handleUpdate}
-                        onError={({ error, path }) => {
-                            console.error('Error:', error, 'at path:', path);
-                            return false;
-                        }}
-                        // Разрешаем редактирование значений
-                        restrictEdit={() => false}
-                        // Запрещаем удаление и добавление через JSON редактор
-                        restrictDelete={() => true}
-                        restrictAdd={() => true}
-                        restrictDrag={() => true}
-                        // Скрываем селектор типов
-                        showTypesSelector={false}
-                        icons={{
-                            add: <span />,
-                            edit: <span>✏️</span>,
-                            delete: <span />,
-                            copy: <span>📋</span>,
-                            ok: <span>✓</span>,
-                            cancel: <span>✗</span>,
-                            chevron: <span>▶</span>
-                        }}
-                        translations={{
-                            KEY_NEW: 'Новый ключ',
-                            KEY_SELECT: 'Выберите ключ',
-                            NO_KEY_OPTIONS: 'Нет доступных ключей',
-                            ERROR_KEY_EXISTS: 'Ключ уже существует',
-                            ERROR_INVALID_JSON: 'Неверный JSON',
-                            DEFAULT_STRING: 'Новые данные!',
-                            DEFAULT_NEW_KEY: 'ключ',
-                            EMPTY_STRING: '<пустая строка>',
-                            TOOLTIP_COPY: 'Копировать',
-                            TOOLTIP_EDIT: 'Редактировать',
-                            TOOLTIP_DELETE: '',
-                            TOOLTIP_ADD: ''
-                        }}
-                    />
-                </div>
-
-                <div className="validation-panel">
-                    <h4>Валидация</h4>
-                    
-                    {Object.keys(errors).length === 0 ? (
-                        <div className="validation-success">
-                            ✅ Конфигурация валидна
-                        </div>
-                    ) : (
-                        <div className="validation-errors">
-                            <h5>Ошибки:</h5>
-                            {Object.entries(errors).map(([field, error]) => (
-                                <div key={field} className="error-item">
-                                    <span className="error-field">{field}:</span>
-                                    <span className="error-message">{error}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="field-info">
-                        <h5>Справка по типам полей:</h5>
-                        <ul>
-                            <li><strong>String:</strong> Строка текста</li>
-                            <li><strong>Integer/Long:</strong> Целые числа</li>
-                            <li><strong>Double/Float:</strong> Числа с плавающей точкой</li>
-                            <li><strong>Boolean:</strong> Логическое значение (true/false)</li>
-                            <li><strong>LocalDate/LocalDateTime:</strong> Дата и время</li>
-                        </ul>
-                        
-                        <h5>Типы отношений:</h5>
-                        <ul>
-                            <li><strong>ONE_TO_ONE:</strong> Один к одному</li>
-                            <li><strong>ONE_TO_MANY:</strong> Один ко многим</li>
-                            <li><strong>MANY_TO_ONE:</strong> Многие к одному</li>
-                            <li><strong>MANY_TO_MANY:</strong> Многие ко многим</li>
-                        </ul>
-                    </div>
-                </div>
+            
+            <div>
+                <JsonEditor
+                    data={data}
+                    setData={setData}
+                    restrictTypeSelection={restrictTypeSelection}
+                    showTypesSelector={true}
+                    icons={{
+                        edit: <span>✏️</span>,
+                        ok: <span>✓</span>,
+                        cancel: <span>✗</span>,
+                        chevron: <span>▼</span>
+                    }}
+                />
             </div>
         </div>
     );

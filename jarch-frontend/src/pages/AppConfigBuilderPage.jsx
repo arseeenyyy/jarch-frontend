@@ -31,7 +31,6 @@ const AppConfigBuilderPage = () => {
             return;
         }
 
-        // Проверка обязательных полей для app-config
         if (activeTab === 'app') {
             const requiredFields = [
                 'basePackage',
@@ -58,7 +57,6 @@ const AppConfigBuilderPage = () => {
             }
         }
 
-        // Проверка для entity-config
         if (activeTab === 'entity' && configToDownload.entities) {
             for (const entity of configToDownload.entities) {
                 if (!entity.name) {
@@ -114,13 +112,10 @@ const AppConfigBuilderPage = () => {
     return (
         <div className="app-config-builder-page">
             <div className="page-header">
-                <h1>⚙️ Конструктор конфигураций Spring Boot</h1>
                 <p className="subtitle">
-                    Редактируйте конфигурации Spring Boot приложения. Ключи нельзя редактировать, только значения.
                 </p>
             </div>
 
-            {/* Табы для переключения между конфигурациями */}
             <div className="config-tabs">
                 <button 
                     className={`tab-btn ${activeTab === 'app' ? 'active' : ''}`}
@@ -142,16 +137,9 @@ const AppConfigBuilderPage = () => {
                     className="action-btn primary"
                     disabled={activeTab === 'app' ? !appConfig : !entityConfig}
                 >
-                    📥 Скачать {activeTab === 'app' ? 'app-config.json' : 'entity-config.json'}
+                    Скачать {activeTab === 'app' ? 'app-config.json' : 'entity-config.json'}
                 </button>
                 
-                <button 
-                    onClick={copyToClipboard}
-                    className="action-btn secondary"
-                    disabled={activeTab === 'app' ? !appConfig : !entityConfig}
-                >
-                    📋 Копировать JSON
-                </button>
                 
                 {downloadReady && (
                     <div className="success-message">
@@ -171,7 +159,7 @@ const AppConfigBuilderPage = () => {
             <div className="info-section">
                 {activeTab === 'app' ? (
                     <>
-                        <div className="info-card">
+                        {/* <div className="info-card">
                             <h3>🎯 Особенности редактора app-config:</h3>
                             <ul>
                                 <li>Ключи защищены от редактирования и удаления</li>
@@ -191,11 +179,11 @@ const AppConfigBuilderPage = () => {
                                 <li><strong>Tab</strong> - перейти к следующему полю</li>
                                 <li><strong>Shift+Tab</strong> - перейти к предыдущему полю</li>
                             </ul>
-                        </div>
+                        </div> */}
                     </>
                 ) : (
                     <>
-                        <div className="info-card">
+                        {/* <div className="info-card">
                             <h3>🎯 Особенности редактора entity-config:</h3>
                             <ul>
                                 <li>Добавление сущностей через кнопки</li>
@@ -215,7 +203,7 @@ const AppConfigBuilderPage = () => {
                                 <li><strong>Fetch Type:</strong> LAZY (ленивая) или EAGER (жадная) загрузка</li>
                                 <li><strong>Cascade Type:</strong> операции каскадирования</li>
                             </ul>
-                        </div>
+                        </div> */}
                     </>
                 )}
             </div>

@@ -1,0 +1,17 @@
+{
+  "basePackage": "com.ecommerce.app",
+  "applicationName": "E-Commerce Application",
+  "buildTool": "MAVEN",
+  "propertiesFormat": "YAML",
+  "serverPort": 8080,
+  "database": {
+    "type": "POSTGRESQL",
+    "host": "localhost",
+    "port": 5432,
+    "databaseName": "postgres",
+    "username": "root",
+    "password": "123",
+    "ddlAuto": "update",
+    "poolSize": 15
+  }
+}

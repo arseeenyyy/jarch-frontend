@@ -7,7 +7,7 @@ import SavesPage from './pages/SavesPage';
 import DownloadsPage from './pages/DownloadsPage';
 import AppConfigBuilderPage from './pages/AppConfigBuilderPage';
 import { setToken } from './services/api';
-import './styles/main.css';
+// import './styles/main.css';
 
 function App() {
     const [activeTab, setActiveTab] = useState('generation');

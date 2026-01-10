@@ -5,7 +5,7 @@ import ProjectsPage from './pages/ProjectsPage';
 import TeamPage from './pages/TeamPage';
 import SavesPage from './pages/SavesPage';
 import DownloadsPage from './pages/DownloadsPage';
-import ConfigBuilderPage from './pages/ConfigBuilderPage';
+import AppConfigBuilderPage from './pages/AppConfigBuilderPage';
 import { setToken } from './services/api';
 import './styles/main.css';
 
@@ -29,8 +29,8 @@ function App() {
                 return <SavesPage />;
             case 'downloads':
                 return <DownloadsPage />;
-            case 'config':
-                return <ConfigBuilderPage />;
+            case 'app-config': 
+                return <AppConfigBuilderPage />;
             default:
                 return <GenerationPage jwtToken={jwtToken} setJwtToken={setJwtToken} />;
         }

@@ -6,7 +6,7 @@ const tabs = [
     { id: 'team', label: 'Управление командой' },
     { id: 'saves', label: 'Сохранения' },
     { id: 'downloads', label: 'Загрузки' },
-    { id: 'config', label: '🧱 Конструктор' }
+    { id: 'app-config', label: 'Конструктор' }
 ];
 
 const Tabs = ({ activeTab, onTabChange }) => {

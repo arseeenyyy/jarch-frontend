@@ -1,46 +1,26 @@
-import React, { useState } from 'react';
-import Layout from './components/Layout';
-import GenerationPage from './pages/GenerationPage';
-import ProjectsPage from './pages/ProjectsPage';
-import TeamPage from './pages/TeamPage';
-import SavesPage from './pages/SavesPage';
-import DownloadsPage from './pages/DownloadsPage';
-import AppConfigBuilderPage from './pages/AppConfigBuilderPage';
-import { setToken } from './services/api';
-// import './styles/main.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { authService } from './services/authService';
+import AuthPage from './pages/AuthPage';
+import MainApp from './MainApp';
 
-function App() {
-    const [activeTab, setActiveTab] = useState('generation');
-    const [jwtToken, setJwtToken] = useState(localStorage.getItem('jwtToken') || '');
-
-    React.useEffect(() => {
-        setToken(jwtToken);
-    }, [jwtToken]);
-
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case 'generation':
-                return <GenerationPage jwtToken={jwtToken} setJwtToken={setJwtToken} />;
-            case 'projects':
-                return <ProjectsPage />;
-            case 'team':
-                return <TeamPage />;
-            case 'saves':
-                return <SavesPage />;
-            case 'downloads':
-                return <DownloadsPage />;
-            case 'app-config': 
-                return <AppConfigBuilderPage />;
-            default:
-                return <GenerationPage jwtToken={jwtToken} setJwtToken={setJwtToken} />;
-        }
-    };
+const App = () => {
+    const isAuthenticated = authService.isAuthenticated();
 
     return (
-        <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-            {renderTabContent()}
-        </Layout>
+        <Router>
+            <Routes>
+                <Route 
+                    path="/login" 
+                    element={isAuthenticated ? <Navigate to="/" /> : <AuthPage />} 
+                />
+                <Route 
+                    path="/*" 
+                    element={isAuthenticated ? <MainApp /> : <Navigate to="/login" />} 
+                />
+            </Routes>
+        </Router>
     );
-}
+};
 
 export default App;

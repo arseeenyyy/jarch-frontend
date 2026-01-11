@@ -41,12 +41,10 @@ const GenerationPage = ({ jwtToken, setJwtToken }) => {
             const { id } = await projectService.generateProject(formData);
             addLog("INFO", `ID генерации: ${id}`);
             
-            // Закрываем предыдущий EventSource если есть
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
             }
             
-            // Создаем новый EventSource
             eventSourceRef.current = projectService.startGenerationStream(
                 id,
                 (level, message) => addLog(level, message),

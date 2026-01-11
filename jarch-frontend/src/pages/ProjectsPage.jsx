@@ -42,7 +42,6 @@ const ProjectsPage = () => {
 
     const viewProject = (id) => {
         alert(`Просмотр проекта ID: ${id}`);
-        // Здесь можно добавить навигацию на детальную страницу проекта
     };
 
     return (

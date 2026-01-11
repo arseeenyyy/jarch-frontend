@@ -15,8 +15,6 @@ const SavesPage = () => {
     const loadSaves = async () => {
         try {
             const savesList = await saveService.getSaves();
-            // Фильтруем только сохранения текущего пользователя
-            // (можно добавить логику фильтрации по имени пользователя)
             setSaves(savesList);
         } catch (error) {
             console.error('Ошибка загрузки сохранений:', error);
@@ -48,7 +46,6 @@ const SavesPage = () => {
             setSaveName('');
             setEntityFile(null);
             setAppFile(null);
-            // Сброс input файлов
             document.querySelectorAll('#createSaveForm input[type="file"]').forEach(input => {
                 input.value = '';
             });
@@ -70,7 +67,6 @@ const SavesPage = () => {
     };
 
     const selectSave = (saveName) => {
-        // Можно загрузить конфигурацию для предпросмотра
         console.log('Selected save:', saveName);
     };
 

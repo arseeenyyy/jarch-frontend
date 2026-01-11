@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { JsonEditor } from 'json-edit-react';
+import customJsonEditorTheme from './JsonTheme';
 
 const AppConfigEditor = ({ onChange, onValidationChange }) => {
     const [data, setData] = useState({
@@ -138,7 +139,7 @@ const AppConfigEditor = ({ onChange, onValidationChange }) => {
     };
 
     return (
-        <div>
+        <div style={{ width: '100%', minWidth: '100%' }}>
             <JsonEditor
                 data={data}
                 setData={handleDataChange}
@@ -148,9 +149,14 @@ const AppConfigEditor = ({ onChange, onValidationChange }) => {
                 restrictDelete={() => true}
                 restrictEdit={() => false}
                 restrictDrag={() => true}
+                theme={customJsonEditorTheme} 
                 icons={{
                     add: <span style={{ display: 'none' }} />,
                     delete: <span style={{ display: 'none' }} />
+                }}
+                style={{
+                    minWidth: '100%',
+                    width: '100%'
                 }}
             />
         </div>

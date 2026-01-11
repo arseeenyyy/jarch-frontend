@@ -6,7 +6,7 @@ const ProjectCard = ({ project, onView }) => {
             <h4>{project.name}</h4>
             <p>{project.description || 'Без описания'}</p>
             <span className="status-badge status-active">Активен</span>
-            <div style={{ marginTop: '10px' }}>
+            <div>
                 <button onClick={() => onView(project.id)} className="secondary">
                     Просмотр
                 </button>

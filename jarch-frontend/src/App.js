@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { authService } from './services/authService';
 import AuthPage from './pages/AuthPage';
 import MainApp from './MainApp';
+import './styles/main.css'
 
 const App = () => {
     const isAuthenticated = authService.isAuthenticated();
@@ -16,7 +17,8 @@ const App = () => {
                 />
                 <Route 
                     path="/*" 
-                    element={isAuthenticated ? <MainApp /> : <Navigate to="/login" />} 
+                    // element={isAuthenticated ? <MainApp /> : <Navigate to="/login" />} 
+                    element={<MainApp />}
                 />
             </Routes>
         </Router>

@@ -34,7 +34,6 @@ const DownloadsPage = () => {
 
     const handleDownloadConfig = async () => {
         if (!saveName) {
-            alert('Введите название сохранения');
             return;
         }
 
@@ -43,13 +42,12 @@ const DownloadsPage = () => {
             downloadAsFile(config, `${saveName}_config.json`, 'application/json');
             addToHistory(`Конфиг приложения: ${saveName}`);
         } catch (error) {
-            alert('Ошибка: ' + error.message);
+            console.error('Ошибка скачивания конфига:', error);
         }
     };
 
     const handleDownloadEntity = async () => {
         if (!saveName) {
-            alert('Введите название сохранения');
             return;
         }
 
@@ -58,18 +56,18 @@ const DownloadsPage = () => {
             downloadAsFile(config, `${saveName}_entity.json`, 'application/json');
             addToHistory(`Конфиг сущностей: ${saveName}`);
         } catch (error) {
-            alert('Ошибка: ' + error.message);
+            console.error('Ошибка скачивания сущностей:', error);
         }
     };
 
     return (
-        <div id="downloads" className="tab-content active">
-            <h2>📥 Загрузки</h2>
+        <div>
+            <h2>Загрузки</h2>
 
-            <div className="grid">
-                <div className="card">
-                    <h3>⚙️ Загрузить конфигурации</h3>
-                    <div className="form-group">
+            <div>
+                <div>
+                    <h3>Загрузить конфигурации</h3>
+                    <div>
                         <label>Название сохранения:</label>
                         <input 
                             type="text" 
@@ -79,18 +77,18 @@ const DownloadsPage = () => {
                         />
                     </div>
                     <button onClick={handleDownloadConfig}>
-                        📥 Загрузить конфиг приложения
+                        [Загрузить конфиг приложения]
                     </button>
-                    <button onClick={handleDownloadEntity} className="secondary" style={{ marginTop: '10px' }}>
-                        📥 Загрузить конфиг сущностей
+                    <button onClick={handleDownloadEntity}>
+                        [Загрузить конфиг сущностей]
                     </button>
                 </div>
 
-                <div className="card">
-                    <h3>📊 История загрузок</h3>
-                    <div id="downloadHistory">
+                <div>
+                    <h3>История загрузок</h3>
+                    <div>
                         {downloadHistory.map((entry, index) => (
-                            <div key={index} className="save-item">
+                            <div key={index}>
                                 {entry.timestamp} - {entry.item}
                             </div>
                         ))}

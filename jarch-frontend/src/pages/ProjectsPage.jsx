@@ -17,7 +17,6 @@ const ProjectsPage = () => {
             setProjects(userProjects);
         } catch (error) {
             console.error('Ошибка загрузки проектов:', error);
-            alert('Ошибка загрузки проектов: ' + error.message);
         }
     };
 
@@ -31,28 +30,27 @@ const ProjectsPage = () => {
                 owner: 'current-user'
             });
             
-            alert('Проект успешно создан!');
             setProjectName('');
             setProjectDescription('');
             loadProjects();
         } catch (error) {
-            alert('Ошибка создания проекта: ' + error.message);
+            console.error('Ошибка создания проекта:', error);
         }
     };
 
     const viewProject = (id) => {
-        alert(`Просмотр проекта ID: ${id}`);
+        console.log('Просмотр проекта ID:', id);
     };
 
     return (
-        <div id="projects" className="tab-content active">
-            <h2>📂 Мои проекты</h2>
+        <div>
+            <h2>Мои проекты</h2>
 
-            <div className="grid">
-                <div className="card">
-                    <h3>🆕 Создать проект</h3>
+            <div>
+                <div>
+                    <h3>Создать проект</h3>
                     <form onSubmit={handleSubmit}>
-                        <div className="form-group">
+                        <div>
                             <label>Название проекта:</label>
                             <input 
                                 type="text" 
@@ -62,7 +60,7 @@ const ProjectsPage = () => {
                                 required 
                             />
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label>Описание:</label>
                             <textarea 
                                 value={projectDescription}
@@ -71,13 +69,22 @@ const ProjectsPage = () => {
                                 rows="3"
                             />
                         </div>
-                        <button type="submit">Создать проект</button>
+                            <button 
+                                type="submit"
+                                style={{
+                                    display: "block",
+                                    textAlign: "left",
+                                    paddingLeft: "5px"
+                                }}
+                            >
+                                [Создать проект]
+                            </button>             
                     </form>
                 </div>
 
-                <div className="card">
-                    <h3>📋 Список проектов</h3>
-                    <div className="project-list">
+                <div>
+                    <h3>Список проектов</h3>
+                    <div>
                         {projects.map(project => (
                             <ProjectCard 
                                 key={project.id} 
@@ -86,8 +93,13 @@ const ProjectsPage = () => {
                             />
                         ))}
                     </div>
-                    <button onClick={loadProjects} className="secondary" style={{ marginTop: '10px' }}>
-                        🔄 Обновить список
+                    <button style={{
+                                    display: "block",
+                                    textAlign: "left",
+                                    paddingLeft: "5px"
+                                }}
+                            onClick={loadProjects}>
+                        [обновить список]
                     </button>
                 </div>
             </div>

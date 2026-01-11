@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { teamService } from '../services/teamService';
 import { projectService } from '../services/projectService';
-import TeamMember from '../components/TeamMember';
 
 const TeamPage = () => {
     const [projects, setProjects] = useState([]);
@@ -50,7 +49,6 @@ const TeamPage = () => {
                 ...memberData
             });
             
-            alert('Участник успешно добавлен!');
             setMemberData({
                 username: '',
                 role: 'DEVELOPER',
@@ -58,7 +56,7 @@ const TeamPage = () => {
             });
             loadTeamMembers();
         } catch (error) {
-            alert('Ошибка добавления участника: ' + error.message);
+            console.error('Ошибка добавления участника:', error);
         }
     };
 
@@ -70,14 +68,14 @@ const TeamPage = () => {
     };
 
     return (
-        <div id="team" className="tab-content active">
-            <h2>👥 Управление командой</h2>
+        <div>
+            <h2>Управление командой</h2>
 
-            <div className="grid">
-                <div className="card">
-                    <h3>➕ Добавить участника</h3>
+            <div>
+                <div>
+                    <h3>Добавить участника</h3>
                     <form onSubmit={handleSubmit}>
-                        <div className="form-group">
+                        <div>
                             <label>Проект:</label>
                             <select 
                                 value={selectedProject}
@@ -92,7 +90,7 @@ const TeamPage = () => {
                                 ))}
                             </select>
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label>Имя пользователя:</label>
                             <input 
                                 type="text" 
@@ -103,7 +101,7 @@ const TeamPage = () => {
                                 required 
                             />
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label>Роль:</label>
                             <select 
                                 name="role"
@@ -117,7 +115,7 @@ const TeamPage = () => {
                                 <option value="PRODUCT_OWNER">Product Owner</option>
                             </select>
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label>Уровень доступа:</label>
                             <select 
                                 name="accessLevel"
@@ -130,13 +128,19 @@ const TeamPage = () => {
                                 <option value="ADMIN">Администратор</option>
                             </select>
                         </div>
-                        <button type="submit">Добавить в команду</button>
+                        <button type="submit" style={{
+                                    display: "block",
+                                    textAlign: "left",
+                                    paddingLeft: "5px"
+                        }}>
+                                    [Добавить в команду]
+                        </button>
                     </form>
                 </div>
 
-                <div className="card">
-                    <h3>👥 Участники команды</h3>
-                    <div className="form-group">
+                <div>
+                    <h3>Участники команды</h3>
+                    <div>
                         <label>Выберите проект:</label>
                         <select 
                             value={selectedProject}
@@ -150,9 +154,15 @@ const TeamPage = () => {
                             ))}
                         </select>
                     </div>
-                    <div id="teamMembersList">
+                    <div>
                         {members.map(member => (
-                            <TeamMember key={member.id} member={member} />
+                            <div key={member.id}>
+                                <div>
+                                    <strong>{member.username}</strong>
+                                    <br />
+                                    <small>Роль: {member.role} • Доступ: {member.accessLevel}</small>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>

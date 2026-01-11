@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { JsonEditor } from 'json-edit-react';
+import customJsonEditorTheme from './JsonTheme';
 
 const EntityConfigEditor = ({ onChange, onValidationChange }) => {
     const [data, setData] = useState({
@@ -342,51 +343,59 @@ const EntityConfigEditor = ({ onChange, onValidationChange }) => {
     };
 
     return (
-        <div>
-            <div>
-                <button onClick={addEntity}>
+        <div className="entity-editor-container">
+            <div className="entity-controls-fixed">
+                <button className="add-entity-btn" onClick={addEntity}>
                     + Добавить сущность
                 </button>
                 
                 {data.entities.map((entity, entityIndex) => (
-                    <div key={entityIndex}>
-                        <div>
-                            <h4>{entity.name || `Сущность ${entityIndex + 1}`}</h4>
-                            <div>
-                                <button onClick={() => addField(entityIndex, false)}>
-                                    + Простое поле
-                                </button>
-                                <button onClick={() => addField(entityIndex, true)}>
-                                    + Связанное поле
-                                </button>
-                            </div>
+                    <div key={entityIndex} className="entity-header-compact">
+                        <h4>{entity.name || `Сущность ${entityIndex + 1}`}</h4>
+                        <div className="entity-controls-compact">
+                            <button 
+                                className="add-field-btn"
+                                onClick={() => addField(entityIndex, false)}
+                            >
+                                + Простое поле
+                            </button>
+                            <button 
+                                className="add-field-btn"
+                                onClick={() => addField(entityIndex, true)}
+                            >
+                                + Связанное поле
+                            </button>
                         </div>
                     </div>
                 ))}
             </div>
             
-            <div>
-                <JsonEditor
-                    data={data}
-                    setData={handleDataChange}
-                    restrictTypeSelection={restrictTypeSelection}
-                    restrictEdit={restrictEdit}
-                    showTypesSelector={true}
-                    restrictAdd={(node) => {
-                        const path = node.path ? node.path.join('.') : '';
-                        return !path.includes('entities') && !path.includes('fields');
-                    }}
-                    restrictDelete={(node) => {
-                        const path = node.path ? node.path.join('.') : '';
-                        return path === '' || path === 'entities';
-                    }}
-                    restrictDrag={() => true}
-                    icons={{
-                        add: <span style={{ display: 'none' }} />,
-                        delete: <span style={{ display: 'none' }} />
-                    }}
-                />
-            </div>
+            {/* Теперь используем общий класс json-editor-wrapper */}
+            <JsonEditor
+                data={data}
+                setData={handleDataChange}
+                restrictTypeSelection={restrictTypeSelection}
+                restrictEdit={restrictEdit}
+                showTypesSelector={true}
+                restrictAdd={(node) => {
+                    const path = node.path ? node.path.join('.') : '';
+                    return !path.includes('entities') && !path.includes('fields');
+                }}
+                restrictDelete={(node) => {
+                    const path = node.path ? node.path.join('.') : '';
+                    return path === '' || path === 'entities';
+                }}
+                restrictDrag={() => true}
+                theme={customJsonEditorTheme} 
+                icons={{
+                    add: <span style={{ display: 'none' }} />,
+                    delete: <span style={{ display: 'none' }} />
+                }}
+                style={{
+                    minWidth: '100%',
+                    width: '100%'
+                }}
+            />
         </div>
     );
 };

@@ -10,13 +10,6 @@ import { authService } from './services/authService';
 
 function MainApp() {
     const [activeTab, setActiveTab] = useState('generation');
-    const [jwtToken, setJwtToken] = useState(authService.getToken() || '');
-
-    React.useEffect(() => {
-        if (jwtToken) {
-            authService.setToken(jwtToken);
-        }
-    }, [jwtToken]);
 
     const handleLogout = () => {
         authService.logout();
@@ -26,7 +19,7 @@ function MainApp() {
     const renderTabContent = () => {
         switch (activeTab) {
             case 'generation':
-                return <GenerationPage jwtToken={jwtToken} setJwtToken={setJwtToken} />;
+                return <GenerationPage />;
             case 'projects':
                 return <ProjectsPage />;
             case 'team':
@@ -38,7 +31,7 @@ function MainApp() {
             case 'app-config': 
                 return <AppConfigBuilderPage />;
             default:
-                return <GenerationPage jwtToken={jwtToken} setJwtToken={setJwtToken} />;
+                return <GenerationPage />;
         }
     };
 

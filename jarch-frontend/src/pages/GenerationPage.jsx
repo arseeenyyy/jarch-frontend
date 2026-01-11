@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { projectService } from '../services/projectService';
 import LogViewer from '../components/LogViewer';
+import { authService } from '../services/authService';
 
-const GenerationPage = ({ jwtToken, setJwtToken }) => {
+const GenerationPage = () => {
     const [entityFile, setEntityFile] = useState(null);
     const [appFile, setAppFile] = useState(null);
     const [logs, setLogs] = useState([]);
@@ -19,14 +20,15 @@ const GenerationPage = ({ jwtToken, setJwtToken }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!jwtToken.trim()) {
-            alert("Введите JWT токен!");
+
+        const token = authService.getToken();
+        if (!token || !token.trim()) {
+            console.error('Пользователь не авторизован');
             return;
         }
 
         if (!entityFile || !appFile) {
-            alert("Загрузите оба конфигурационных файла!");
+            console.error('Необходимо загрузить оба файла конфигурации');
             return;
         }
 
@@ -103,23 +105,12 @@ const GenerationPage = ({ jwtToken, setJwtToken }) => {
     };
 
     return (
-        <div id="generation" className="tab-content active">
-            <h2>🛠️ Генерация нового проекта</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>JWT токен:</label>
-                    <input 
-                        type="text" 
-                        value={jwtToken}
-                        onChange={(e) => setJwtToken(e.target.value)}
-                        placeholder="Введите JWT токен" 
-                        required 
-                        disabled={isGenerating}
-                    />
-                </div>
+        <div>
+            <h2>Генерация проекта</h2>
 
-                <div className="grid">
-                    <div className="form-group">
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <div>
                         <label>Конфигурация сущностей (JSON):</label>
                         <input 
                             type="file" 
@@ -129,7 +120,7 @@ const GenerationPage = ({ jwtToken, setJwtToken }) => {
                             disabled={isGenerating}
                         />
                     </div>
-                    <div className="form-group">
+                    <div>
                         <label>Конфигурация приложения (JSON):</label>
                         <input 
                             type="file" 
@@ -141,8 +132,12 @@ const GenerationPage = ({ jwtToken, setJwtToken }) => {
                     </div>
                 </div>
 
-                <button type="submit" disabled={isGenerating}>
-                    {isGenerating ? '⏳ Генерация...' : '🚀 Сгенерировать проект'}
+                <button type="submit" disabled={isGenerating} style={{
+                                    display: "block",
+                                    textAlign: "left",
+                                    paddingLeft: "5px"
+                }}>
+                    {isGenerating ? '[Генерация...]' : '[Сгенерировать проект]'}
                 </button>
             </form>
 

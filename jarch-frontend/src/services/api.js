@@ -54,32 +54,6 @@ export const request = async (endpoint, options = {}) => {
     }
 };
 
-export const authenticate = async (username, password) => {
-    try {
-        const response = await fetch(`${API_BASE}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Ошибка аутентификации');
-        }
-        
-        const data = await response.json();
-        if (data.token) {
-            setToken(data.token);
-            return data.token;
-        }
-        throw new Error('Токен не получен');
-    } catch (error) {
-        console.error('Authentication failed:', error);
-        throw error;
-    }
-};
-
 export const register = async (username, password, email) => {
     try {
         const response = await fetch(`${API_BASE}/auth/register?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&email=${encodeURIComponent(email)}`, {
@@ -87,13 +61,42 @@ export const register = async (username, password, email) => {
         });
         
         if (!response.ok) {
-            throw new Error('Ошибка регистрации');
+            const errorText = await response.text();
+            throw new Error(errorText || 'Ошибка регистрации');
         }
         
-        const data = await response.json();
-        return data;
+        // Сервер возвращает просто строку с токеном, а не JSON
+        const token = await response.text();
+        if (token) {
+            setToken(token);
+            return token;
+        }
+        throw new Error('Токен не получен');
     } catch (error) {
         console.error('Registration failed:', error);
+        throw error;
+    }
+};
+
+export const authenticate = async (email, password) => {
+    try {
+        const response = await fetch(`${API_BASE}/auth/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
+            method: 'GET'
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Ошибка аутентификации');
+        }
+        
+        const token = await response.text();
+        if (token) {
+            setToken(token);
+            return token;
+        }
+        throw new Error('Токен не получен');
+    } catch (error) {
+        console.error('Authentication failed:', error);
         throw error;
     }
 };

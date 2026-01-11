@@ -1,8 +1,8 @@
 import { authenticate, register, logout as apiLogout, getToken, setToken } from './api';
 
 export const authService = {
-    async login(username, password) {
-        return await authenticate(username, password);
+    async login(email, password) {
+        return await authenticate(email, password);
     },
 
     async register(username, password, email) {

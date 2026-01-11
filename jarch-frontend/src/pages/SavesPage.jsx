@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { saveService } from '../services/saveService';
-import SaveItem from '../components/SaveItem';
 
 const SavesPage = () => {
     const [saves, setSaves] = useState([]);
@@ -18,7 +17,6 @@ const SavesPage = () => {
             setSaves(savesList);
         } catch (error) {
             console.error('Ошибка загрузки сохранений:', error);
-            alert('Ошибка загрузки сохранений: ' + error.message);
         }
     };
 
@@ -26,12 +24,10 @@ const SavesPage = () => {
         e.preventDefault();
         
         if (!saveName.trim()) {
-            alert('Введите название сохранения!');
             return;
         }
 
         if (!entityFile || !appFile) {
-            alert('Загрузите оба конфигурационных файла!');
             return;
         }
 
@@ -42,43 +38,40 @@ const SavesPage = () => {
 
         try {
             await saveService.createSave(formData);
-            alert('Сохранение успешно создано!');
             setSaveName('');
             setEntityFile(null);
             setAppFile(null);
-            document.querySelectorAll('#createSaveForm input[type="file"]').forEach(input => {
+            document.querySelectorAll('input[type="file"]').forEach(input => {
                 input.value = '';
             });
             loadSaves();
         } catch (error) {
-            alert('Ошибка создания сохранения: ' + error.message);
+            console.error('Ошибка создания сохранения:', error);
         }
     };
 
     const deleteSave = async (saveName) => {
-        if (window.confirm(`Удалить сохранение "${saveName}"?`)) {
-            try {
-                await saveService.deleteSave(saveName);
-                loadSaves();
-            } catch (error) {
-                alert('Ошибка удаления: ' + error.message);
-            }
+        try {
+            await saveService.deleteSave(saveName);
+            loadSaves();
+        } catch (error) {
+            console.error('Ошибка удаления:', error);
         }
     };
 
     const selectSave = (saveName) => {
-        console.log('Selected save:', saveName);
+        console.log('Выбрано сохранение:', saveName);
     };
 
     return (
-        <div id="saves" className="tab-content active">
-            <h2>💾 Управление сохранениями</h2>
+        <div>
+            <h2>Управление сохранениями</h2>
 
-            <div className="grid">
-                <div className="card">
-                    <h3>💾 Создать сохранение</h3>
-                    <form id="createSaveForm" onSubmit={handleSubmit}>
-                        <div className="form-group">
+            <div>
+                <div>
+                    <h3>Создать сохранение</h3>
+                    <form onSubmit={handleSubmit}>
+                        <div>
                             <label>Название сохранения:</label>
                             <input 
                                 type="text" 
@@ -88,7 +81,7 @@ const SavesPage = () => {
                                 required 
                             />
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label>Конфигурация сущностей:</label>
                             <input 
                                 type="file" 
@@ -97,7 +90,7 @@ const SavesPage = () => {
                                 required 
                             />
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label>Конфигурация приложения:</label>
                             <input 
                                 type="file" 
@@ -106,29 +99,36 @@ const SavesPage = () => {
                                 required 
                             />
                         </div>
-                        <button type="submit">💾 Сохранить конфигурацию</button>
+                        <button style={{
+                                    display: "block",
+                                    textAlign: "left",
+                                    paddingLeft: "5px"
+                                }} type="submit">
+                            [Сохранить конфигурацию]
+                        </button>
                     </form>
                 </div>
 
-                <div className="card">
-                    <h3>📂 Мои сохранения</h3>
-                    <div id="savesList">
+                <div>
+                    <h3>Мои сохранения</h3>
+                    <div>
                         {saves.map(save => (
-                            <SaveItem 
-                                key={save}
-                                save={save}
-                                onSelect={selectSave}
-                                onDelete={deleteSave}
-                            />
+                            <div key={save} onClick={() => selectSave(save)}>
+                                <span>{save}</span>
+                                <button onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    deleteSave(save); 
+                                }}>
+                                    Удалить
+                                </button>
+                            </div>
                         ))}
                         {saves.length === 0 && (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '20px' }}>
-                                Нет сохранений
-                            </p>
+                            <p>Нет сохранений</p>
                         )}
                     </div>
-                    <button onClick={loadSaves} className="secondary" style={{ marginTop: '10px' }}>
-                        🔄 Обновить список
+                    <button onClick={loadSaves}>
+                        Обновить список
                     </button>
                 </div>
             </div>

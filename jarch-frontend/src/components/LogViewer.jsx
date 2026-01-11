@@ -10,16 +10,16 @@ const LogViewer = ({ logs }) => {
     }, [logs]);
 
     return (
-        <>
-            <h3 style={{ marginTop: '30px' }}>Логи генерации:</h3>
-            <div ref={logContainerRef} className="log-container">
+        <div>
+            <h3>Логи генерации</h3>
+            <div ref={logContainerRef}>
                 {logs.map((log, index) => (
-                    <div key={index} className={`log-${log.level.toLowerCase()}`}>
+                    <div key={index}>
                         [{new Date(log.timestamp).toLocaleTimeString()}] {log.message}
                     </div>
                 ))}
             </div>
-        </>
+        </div>
     );
 };
 

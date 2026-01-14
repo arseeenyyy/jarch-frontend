@@ -16,24 +16,19 @@ export const projectService = {
     },
 
     async getProject(id) {
-        return request(`/project/${id}`, {
+        return request(`/project?projectId=${id}`, {
             headers: getHeaders()
         });
     },
 
     async updateProject(id, projectData) {
-        return request(`/project/${id}`, {
-            method: 'PUT',
-            headers: getHeaders(),
-            body: JSON.stringify(projectData)
-        });
+        console.warn('Update project endpoint not implemented');
+        throw new Error('Update project endpoint not implemented');
     },
 
     async deleteProject(id) {
-        return request(`/project/${id}`, {
-            method: 'DELETE',
-            headers: getHeaders()
-        });
+        console.warn('Delete project endpoint not implemented');
+        throw new Error('Delete project endpoint not implemented');
     },
 
     async generateProject(formData) {

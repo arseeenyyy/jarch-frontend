@@ -2,15 +2,20 @@ import { authenticate, register, logout as apiLogout, getToken, setToken } from 
 
 export const authService = {
     async login(email, password) {
-        return await authenticate(email, password);
+        const token = await authenticate(email, password);
+        this.setToken(token);
+        return token;
     },
 
     async register(username, password, email) {
-        return await register(username, password, email);
+        const token = await register(username, password, email);
+        this.setToken(token);
+        return token;
     },
 
     logout() {
         apiLogout();
+        window.dispatchEvent(new Event('authChange'));
     },
 
     isAuthenticated() {
@@ -23,5 +28,6 @@ export const authService = {
 
     setToken(token) {
         setToken(token);
+        window.dispatchEvent(new Event('authChange'));
     }
 };

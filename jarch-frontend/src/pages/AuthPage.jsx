@@ -19,6 +19,7 @@ const AuthPage = () => {
             ...formData,
             [e.target.name]: e.target.value
         });
+        setError(''); // Сбрасываем ошибку при изменении
     };
 
     const handleSubmit = async (e) => {
@@ -27,21 +28,25 @@ const AuthPage = () => {
         setLoading(true);
 
         try {
+            let token;
             if (isLogin) {
-                const token = await authService.login(formData.email, formData.password);
-                if (token) {
-                    authService.setToken(token);
-                    navigate('/');
-                }
+                token = await authService.login(formData.email, formData.password);
             } else {
-                const token = await authService.register(formData.username, formData.password, formData.email);
-                if (token) {
-                    authService.setToken(token);
-                    navigate('/');
-                }
+                token = await authService.register(formData.username, formData.password, formData.email);
+            }
+            
+            if (token) {
+                authService.setToken(token);
+                // Принудительно обновляем состояние авторизации
+                window.dispatchEvent(new Event('authChange'));
+                // Перенаправляем на главную
+                navigate('/');
+            } else {
+                throw new Error('Не удалось получить токен');
             }
         } catch (err) {
             setError(err.message || 'Произошла ошибка');
+            console.error('Auth error:', err);
         } finally {
             setLoading(false);
         }

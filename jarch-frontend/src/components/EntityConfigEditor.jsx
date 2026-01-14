@@ -346,7 +346,7 @@ const EntityConfigEditor = ({ onChange, onValidationChange }) => {
         <div className="entity-editor-container">
             <div className="entity-controls-fixed">
                 <button className="add-entity-btn" onClick={addEntity}>
-                    + Добавить сущность
+                    + Сущность
                 </button>
                 
                 {data.entities.map((entity, entityIndex) => (
@@ -357,13 +357,13 @@ const EntityConfigEditor = ({ onChange, onValidationChange }) => {
                                 className="add-field-btn"
                                 onClick={() => addField(entityIndex, false)}
                             >
-                                + Простое поле
+                                + Поле
                             </button>
                             <button 
                                 className="add-field-btn"
                                 onClick={() => addField(entityIndex, true)}
                             >
-                                + Связанное поле
+                                + Связь
                             </button>
                         </div>
                     </div>

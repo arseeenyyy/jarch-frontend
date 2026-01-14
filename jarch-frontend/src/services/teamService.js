@@ -15,16 +15,8 @@ export const teamService = {
         });
     },
 
-    async updateMember(projectId, memberId, memberData) {
-        return request(`/team/${memberId}?projectId=${projectId}`, {
-            method: 'PUT',
-            headers: getHeaders(),
-            body: JSON.stringify(memberData)
-        });
-    },
-
-    async removeMember(projectId, memberId) {
-        return request(`/team/${memberId}?projectId=${projectId}`, {
+    async removeMember(projectId, username) {
+        return request(`/team?teamMember=${encodeURIComponent(username)}&projectId=${projectId}`, {
             method: 'DELETE',
             headers: getHeaders()
         });

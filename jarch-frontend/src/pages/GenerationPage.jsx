@@ -23,12 +23,12 @@ const GenerationPage = () => {
 
         const token = authService.getToken();
         if (!token || !token.trim()) {
-            console.error('Пользователь не авторизован');
+            addLog("ERROR", "Пользователь не авторизован");
             return;
         }
 
         if (!entityFile || !appFile) {
-            console.error('Необходимо загрузить оба файла конфигурации');
+            addLog("ERROR", "Необходимо загрузить оба файла конфигурации");
             return;
         }
 
@@ -40,21 +40,24 @@ const GenerationPage = () => {
             setIsGenerating(true);
             addLog("INFO", "Начинаю генерацию проекта...");
             
-            const { id } = await projectService.generateProject(formData);
-            addLog("INFO", `ID генерации: ${id}`);
+            // В бекенде ожидается возврат ID как числа или объекта с id
+            const response = await projectService.generateProject(formData);
+            const generationId = response.id || response;
+            
+            addLog("INFO", `ID генерации: ${generationId}`);
             
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
             }
             
             eventSourceRef.current = projectService.startGenerationStream(
-                id,
+                generationId,
                 (level, message) => addLog(level, message),
-                () => handleZipReady(id)
+                () => handleZipReady(generationId)
             );
             
         } catch (error) {
-            addLog("ERROR", error.message);
+            addLog("ERROR", error.message || "Ошибка при генерации проекта");
             setIsGenerating(false);
         }
     };
@@ -133,9 +136,9 @@ const GenerationPage = () => {
                 </div>
 
                 <button type="submit" disabled={isGenerating} style={{
-                                    display: "block",
-                                    textAlign: "left",
-                                    paddingLeft: "5px"
+                    display: "block",
+                    textAlign: "left",
+                    paddingLeft: "5px"
                 }}>
                     {isGenerating ? '[Генерация...]' : '[Сгенерировать проект]'}
                 </button>

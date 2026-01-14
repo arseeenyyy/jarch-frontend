@@ -1,6 +1,7 @@
 import { request, getHeaders, getToken } from './api';
 
 export const saveService = {
+    // Работа с файлами в MinIO
     async createSave(formData) {
         return request('/jarch/make-save', {
             method: 'POST',
@@ -13,29 +14,6 @@ export const saveService = {
 
     async getSaves() {
         return request('/jarch/get-saves', {
-            headers: getHeaders()
-        });
-    },
-
-    async getSaveByName(saveName) {
-        return request(`/jarch/save/${saveName}`, {
-            headers: getHeaders()
-        });
-    },
-
-    async updateSave(saveName, formData) {
-        return request(`/jarch/save/${saveName}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${getToken()}`
-            },
-            body: formData
-        });
-    },
-
-    async deleteSave(saveName) {
-        return request(`/jarch/delete-save/${saveName}`, {
-            method: 'DELETE',
             headers: getHeaders()
         });
     },

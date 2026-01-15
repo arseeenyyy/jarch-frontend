@@ -27,16 +27,6 @@ export const projectService = {
         });
     },
 
-    async updateProject(id, projectData) {
-        console.warn('Update project endpoint not implemented');
-        throw new Error('Update project endpoint not implemented');
-    },
-
-    async deleteProject(id) {
-        console.warn('Delete project endpoint not implemented');
-        throw new Error('Delete project endpoint not implemented');
-    },
-
     async generateProject(formData) {
         return request('/jarch/generate-project', {
             method: 'POST',

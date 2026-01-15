@@ -1,12 +1,8 @@
 import React from 'react';
 
 const tabs = [
-    { id: 'generation', label: '[Генерация проекта]' },
     { id: 'projects', label: '[Мои проекты]' },
-    { id: 'team', label: '[Управление командой]' },
-    { id: 'saves', label: '[Сохранения]' },
-    { id: 'downloads', label: '[Загрузки]' },
-    { id: 'app-config', label: '[Конструктор]' }
+    { id: 'generation', label: '[Генерация проекта]' }
 ];
 
 const Tabs = ({ activeTab, onTabChange }) => {

@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import Layout from './components/Layout';
 import GenerationPage from './pages/GenerationPage';
-import ProjectsPage from './pages/ProjectsPage';
-import TeamPage from './pages/TeamPage';
-import SavesPage from './pages/SavesPage';
-import DownloadsPage from './pages/DownloadsPage';
-import AppConfigBuilderPage from './pages/AppConfigBuilderPage';
+import ProjectsPage from './pages/ProjectsPage'; // Теперь здесь будут все подвкладки
 import { authService } from './services/authService';
 
 function MainApp() {
-    const [activeTab, setActiveTab] = useState('generation');
+    const [activeTab, setActiveTab] = useState('projects');
 
     const handleLogout = () => {
         authService.logout();
@@ -22,23 +18,15 @@ function MainApp() {
                 return <GenerationPage />;
             case 'projects':
                 return <ProjectsPage />;
-            case 'team':
-                return <TeamPage />;
-            case 'saves':
-                return <SavesPage />;
-            case 'downloads':
-                return <DownloadsPage />;
-            case 'app-config': 
-                return <AppConfigBuilderPage />;
             default:
-                return <GenerationPage />;
+                return <ProjectsPage />;
         }
     };
 
     return (
         <Layout activeTab={activeTab} onTabChange={setActiveTab}>
             {renderTabContent()}
-            <button onClick={handleLogout} style={{ position: 'fixed', top: '10px', right: '10px' }}>
+            <button onClick={handleLogout} className="logout-button">
                 Выйти
             </button>
         </Layout>

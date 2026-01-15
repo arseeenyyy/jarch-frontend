@@ -7,7 +7,9 @@ const Layout = ({ children, activeTab, onTabChange }) => {
         <div className="container">
             <Header />
             <Tabs activeTab={activeTab} onTabChange={onTabChange} />
-            {children}
+            <div className="main-content">
+                {children}
+            </div>
         </div>
     );
 };

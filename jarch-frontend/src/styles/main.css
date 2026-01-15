@@ -683,3 +683,426 @@ header {
     scrollbar-width: thin;
     scrollbar-color: var(--color-border) var(--color-bg-secondary);
 }
+/* Projects page specific styles */
+.projects-page {
+    margin-top: var(--spacing-md);
+}
+
+.section-tabs {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.section-tab {
+    background: none;
+    border: none;
+    color: var(--color-button);
+    font-family: var(--font-family-main);
+    font-size: 0.95rem;
+    padding: var(--spacing-xs) var(--spacing-md);
+    cursor: pointer;
+    text-transform: lowercase;
+    letter-spacing: 0.08em;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+    position: relative;
+}
+
+.section-tab:hover:not(:disabled) {
+    color: var(--color-button-hover);
+}
+
+.section-tab.active {
+    color: var(--color-button-hover);
+    font-weight: 600;
+}
+
+.section-tab.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 100%;
+    height: 3px;
+    background-color: var(--color-border-focus);
+}
+
+.section-tab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: var(--color-button-disabled);
+}
+
+/* Projects grid */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.project-card {
+    background-color: var(--color-bg-card);
+    padding: var(--spacing-md);
+    border: 2px solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.project-card:hover {
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.project-card.selected {
+    border-color: var(--color-border-focus);
+    background-color: rgba(90, 90, 138, 0.1);
+}
+
+.project-title {
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.1rem;
+}
+
+.project-description {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-md);
+    min-height: 40px;
+}
+
+.project-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.project-badge.owner {
+    background-color: rgba(90, 90, 138, 0.2);
+    color: var(--color-border-focus);
+    border: 1px solid rgba(90, 90, 138, 0.4);
+}
+
+.project-id {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+/* Team section */
+.team-content, .config-builder-content {
+    margin-top: var(--spacing-md);
+}
+
+.selected-project-info {
+    background-color: var(--color-bg-card);
+    padding: var(--spacing-md);
+    border: 2px solid var(--color-border);
+    margin-bottom: var(--spacing-lg);
+}
+
+.selected-project-info .project-name {
+    color: var(--color-text-accent);
+    font-weight: 600;
+}
+
+.team-management {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--spacing-lg);
+}
+
+.add-member-section, .members-list-section {
+    background-color: var(--color-bg-card);
+    padding: var(--spacing-md);
+    border: 2px solid var(--color-border);
+}
+
+.members-list {
+    margin-top: var(--spacing-md);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color var(--transition-fast);
+}
+
+.member-item:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.member-username {
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.member-role {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.remove-button {
+    color: var(--color-error);
+    font-size: 0.9rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.remove-button:hover {
+    color: var(--color-error);
+    background-color: rgba(255, 119, 119, 0.1);
+}
+
+/* Config builder section */
+.no-project-selected {
+    background-color: var(--color-bg-card);
+    padding: var(--spacing-lg);
+    border: 2px solid var(--color-border);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.no-project-selected .hint {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-top: var(--spacing-sm);
+}
+
+.selected-project-banner {
+    background-color: var(--color-bg-card);
+    padding: var(--spacing-md);
+    border: 2px solid var(--color-border);
+    margin-bottom: var(--spacing-lg);
+}
+
+.save-to-project-section {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-end;
+    margin-top: var(--spacing-md);
+}
+
+.save-to-project-section .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.save-to-project-button {
+    height: fit-content;
+    white-space: nowrap;
+}
+
+.download-section {
+    text-align: center;
+    margin: var(--spacing-lg) 0;
+}
+
+.download-button {
+    min-width: 250px;
+}
+
+/* Forms */
+.toggle-form-button {
+    margin-bottom: var(--spacing-md);
+}
+
+.project-form, .member-form {
+    margin-top: var(--spacing-md);
+}
+
+.refresh-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--spacing-md);
+}
+
+.refresh-button {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Messages */
+.error-message, .success-message {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: 2px;
+    animation: slideIn 0.3s ease;
+}
+
+.error-message {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+    border-left: 3px solid var(--color-error);
+}
+
+.success-message {
+    background-color: rgba(119, 255, 119, 0.1);
+    color: var(--color-success);
+    border-left: 3px solid var(--color-success);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Utilities */
+.no-projects, .no-members {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: var(--spacing-xl);
+    font-style: italic;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.main-content {
+    position: relative;
+}
+
+.logout-button {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    z-index: 100;
+    background-color: var(--color-bg-card);
+    border: 2px solid var(--color-border);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.logout-button:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* Стили для input file */
+input[type="file"]::-webkit-file-upload-button {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-main);
+    font-size: 0.9rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-right: var(--spacing-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-transform: lowercase;
+    letter-spacing: 0.08em;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-border-hover);
+}
+
+input[type="file"]::-webkit-file-upload-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Для Firefox */
+input[type="file"]::file-selector-button {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-main);
+    font-size: 0.9rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-right: var(--spacing-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-transform: lowercase;
+    letter-spacing: 0.08em;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-border-hover);
+}
+
+input[type="file"]::file-selector-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submit-button,
+.save-button,
+.download-button,
+.save-project-button,
+.toggle-form-button,
+.action-button,
+.remove-button,
+.mode-toggle-button {
+    text-align: left !important;
+    padding-left: 5px !important;
+}
+
+.project-badge.member {
+    background-color: rgba(119, 119, 255, 0.2);
+    color: #7777ff;
+    border: 1px solid rgba(119, 119, 255, 0.4);
+}
+
+.save-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-xs);
+    background-color: var(--color-bg-card);
+}
+
+.save-name {
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.config-builder-header,
+.section-header h3 {
+    display: none;
+}
+
+.mode-toggle-button {
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+}
+
+.log-viewer {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
+}

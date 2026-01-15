@@ -2,10 +2,14 @@ import { request, getHeaders } from './api';
 
 export const teamService = {
     async addMember(projectId, memberData) {
+        const teamMember = {
+            username: memberData.username
+        };
+        
         return request(`/team?projectId=${projectId}`, {
             method: 'POST',
             headers: getHeaders(),
-            body: JSON.stringify(memberData)
+            body: JSON.stringify(teamMember)
         });
     },
 

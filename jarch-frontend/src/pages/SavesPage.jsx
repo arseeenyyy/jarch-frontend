@@ -6,12 +6,14 @@ const SavesPage = () => {
     const [saveName, setSaveName] = useState('');
     const [entityFile, setEntityFile] = useState(null);
     const [appFile, setAppFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         loadSaves();
     }, []);
 
     const loadSaves = async () => {
+        setLoading(true);
         try {
             const savesList = await saveService.getSaves();
             const formattedSaves = savesList.map(filename => {
@@ -26,22 +28,18 @@ const SavesPage = () => {
             setSaves(uniqueSaves);
         } catch (error) {
             console.error('Ошибка загрузки сохранений:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!saveName.trim()) {
-            alert('Введите название сохранения');
-            return;
-        }
+        if (!saveName.trim()) return;
+        if (!entityFile || !appFile) return;
 
-        if (!entityFile || !appFile) {
-            alert('Загрузите оба файла конфигурации');
-            return;
-        }
-
+        setLoading(true);
         const formData = new FormData();
         formData.append('saveName', saveName);
         formData.append('entityConfig', entityFile);
@@ -57,22 +55,21 @@ const SavesPage = () => {
                 input.value = '';
             });
             
-            loadSaves();
-            alert('Сохранение успешно создано!');
+            await loadSaves();
         } catch (error) {
             console.error('Ошибка создания сохранения:', error);
-            alert('Ошибка при создании сохранения: ' + error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const deleteSave = async (saveName) => {
-        const confirmDelete = window.confirm(`Удалить сохранение "${saveName}"?`);
-        if (!confirmDelete) return;
+    const handleDelete = async (saveName) => {
+        if (!window.confirm(`Удалить сохранение "${saveName}"?`)) return;
         
         setSaves(prev => prev.filter(s => s !== saveName));
     };
 
-    const downloadSave = async (saveName) => {
+    const handleDownload = async (saveName) => {
         try {
             const [entityConfig, appConfig] = await Promise.all([
                 saveService.downloadEntity(saveName),
@@ -103,19 +100,18 @@ const SavesPage = () => {
             
         } catch (error) {
             console.error('Ошибка скачивания:', error);
-            alert('Ошибка при скачивании: ' + error.message);
         }
     };
 
     return (
-        <div>
+        <div className="saves-page">
             <h2>Управление сохранениями конфигураций</h2>
 
-            <div>
-                <div>
+            <div className="saves-content">
+                <div className="create-save-section">
                     <h3>Создать новое сохранение</h3>
-                    <form onSubmit={handleSubmit}>
-                        <div>
+                    <form onSubmit={handleSubmit} className="save-form">
+                        <div className="form-group">
                             <label>Название сохранения:</label>
                             <input 
                                 type="text" 
@@ -123,69 +119,67 @@ const SavesPage = () => {
                                 onChange={(e) => setSaveName(e.target.value)}
                                 placeholder="Уникальное название" 
                                 required 
+                                disabled={loading}
                             />
                         </div>
-                        <div>
+                        <div className="form-group">
                             <label>Конфигурация сущностей (JSON):</label>
                             <input 
                                 type="file" 
                                 accept=".json" 
                                 onChange={(e) => setEntityFile(e.target.files[0])}
                                 required 
+                                disabled={loading}
                             />
                         </div>
-                        <div>
+                        <div className="form-group">
                             <label>Конфигурация приложения (JSON):</label>
                             <input 
                                 type="file" 
                                 accept=".json" 
                                 onChange={(e) => setAppFile(e.target.files[0])}
                                 required 
+                                disabled={loading}
                             />
                         </div>
                         <button 
                             type="submit"
-                            style={{
-                                display: "block",
-                                textAlign: "left",
-                                paddingLeft: "5px"
-                            }}
+                            disabled={loading}
+                            className="submit-button"
                         >
-                            [Сохранить конфигурацию]
+                            {loading ? '[Сохранение...]' : '[Сохранить конфигурацию]'}
                         </button>
                     </form>
                 </div>
 
-                <div>
+                <div className="saves-list-section">
                     <h3>Мои сохраненные конфигурации</h3>
                     
-                    <div>
-                        <button onClick={loadSaves}>
+                    <div className="refresh-section">
+                        <button onClick={loadSaves} disabled={loading} className="refresh-button">
                             [Обновить список]
                         </button>
                     </div>
                     
-                    <div>
+                    <div className="saves-list">
                         {saves.length === 0 ? (
-                            <p>Нет сохраненных конфигураций</p>
+                            <p className="no-saves">Нет сохраненных конфигураций</p>
                         ) : (
                             saves.map((save, index) => (
-                                <div key={index}>
-                                    <span>{save}</span>
-                                    <div>
+                                <div key={index} className="save-item">
+                                    <span className="save-name">{save}</span>
+                                    <div className="save-actions">
                                         <button 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                downloadSave(save);
-                                            }}
+                                            onClick={() => handleDownload(save)}
+                                            disabled={loading}
+                                            className="action-button download"
                                         >
                                             Скачать
                                         </button>
                                         <button 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                deleteSave(save);
-                                            }}
+                                            onClick={() => handleDelete(save)}
+                                            disabled={loading}
+                                            className="action-button delete"
                                         >
                                             Удалить
                                         </button>
@@ -193,11 +187,6 @@ const SavesPage = () => {
                                 </div>
                             ))
                         )}
-                    </div>
-                    
-                    <div>
-                        <p>Сохранение загружает конфигурации в облачное хранилище.</p>
-                        <p>Можно использовать сохраненные конфигурации для быстрой генерации проектов.</p>
                     </div>
                 </div>
             </div>

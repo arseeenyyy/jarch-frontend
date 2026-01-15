@@ -6,10 +6,7 @@ const TeamPage = () => {
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState('');
     const [members, setMembers] = useState([]);
-    const [memberData, setMemberData] = useState({
-        username: '',
-        root: 'VIEWER'
-    });
+    const [memberUsername, setMemberUsername] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -55,7 +52,7 @@ const TeamPage = () => {
             return;
         }
 
-        if (!memberData.username.trim()) {
+        if (!memberUsername.trim()) {
             setError('Введите имя пользователя');
             return;
         }
@@ -64,27 +61,18 @@ const TeamPage = () => {
         setError('');
 
         try {
-            await teamService.addMember(selectedProject, memberData);
-            
-            setMemberData({
-                username: '',
-                root: 'VIEWER'
+            await teamService.addMember(selectedProject, {
+                username: memberUsername
             });
+            
+            setMemberUsername('');
             loadTeamMembers();
-
         } catch (error) {
             console.error('Ошибка добавления участника:', error);
-            setError('Ошибка добавления участника: ' + error.message);
+            setError('Ошибка добавления участника');
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleMemberChange = (e) => {
-        setMemberData({
-            ...memberData,
-            [e.target.name]: e.target.value
-        });
     };
 
     const handleRemoveMember = async (username) => {
@@ -93,39 +81,39 @@ const TeamPage = () => {
             return;
         }
 
-        const confirmDelete = window.confirm(`Удалить участника "${username}" из проекта?`);
-        if (!confirmDelete) return;
+        if (!window.confirm(`Удалить участника "${username}" из проекта?`)) return;
 
         try {
             await teamService.removeMember(selectedProject, username);
             loadTeamMembers();
         } catch (error) {
             console.error('Ошибка удаления участника:', error);
-            setError('Ошибка удаления участника: ' + error.message);
+            setError('Ошибка удаления участника');
         }
     };
 
     return (
-        <div>
+        <div className="team-page">
             <h2>Управление командой</h2>
 
             {error && (
-                <div style={{ color: 'red', padding: '10px', marginBottom: '10px' }}>
+                <div className="error-message">
                     {error}
                 </div>
             )}
 
-            <div>
-                <div>
+            <div className="team-content">
+                <div className="add-member-section">
                     <h3>Добавить участника</h3>
-                    <form onSubmit={handleSubmit}>
-                        <div>
+                    <form onSubmit={handleSubmit} className="member-form">
+                        <div className="form-group">
                             <label>Проект:</label>
                             <select 
                                 value={selectedProject}
                                 onChange={(e) => setSelectedProject(e.target.value)}
                                 required
                                 disabled={loading}
+                                className="project-select"
                             >
                                 <option value="">Выберите проект</option>
                                 {projects.map(project => (
@@ -135,54 +123,39 @@ const TeamPage = () => {
                                 ))}
                             </select>
                         </div>
-                        <div>
+                        <div className="form-group">
                             <label>Имя пользователя:</label>
                             <input 
                                 type="text" 
-                                name="username"
-                                value={memberData.username}
-                                onChange={handleMemberChange}
+                                value={memberUsername}
+                                onChange={(e) => setMemberUsername(e.target.value)}
                                 placeholder="Введите username" 
                                 required 
                                 disabled={loading}
                             />
-                        </div>
-                        <div>
-                            <label>Уровень доступа:</label>
-                            <select 
-                                name="root"
-                                value={memberData.root}
-                                onChange={handleMemberChange}
-                                required
-                                disabled={loading}
-                            >
-                                <option value="VIEWER">Просмотр</option>
-                                <option value="EDITOR">Редактирование</option>
-                                <option value="ADMIN">Администратор</option>
-                            </select>
+                            <div className="form-hint">
+                                Участник будет добавлен с правами VIEWER
+                            </div>
                         </div>
                         <button 
                             type="submit" 
                             disabled={loading || !selectedProject}
-                            style={{
-                                display: "block",
-                                textAlign: "left",
-                                paddingLeft: "5px"
-                            }}
+                            className="submit-button"
                         >
                             {loading ? '[Добавление...]' : '[Добавить в команду]'}
                         </button>
                     </form>
                 </div>
 
-                <div>
+                <div className="members-list-section">
                     <h3>Участники команды</h3>
-                    <div>
+                    <div className="form-group">
                         <label>Выберите проект:</label>
                         <select 
                             value={selectedProject}
                             onChange={(e) => setSelectedProject(e.target.value)}
                             disabled={loading}
+                            className="project-select"
                         >
                             <option value="">Выберите проект</option>
                             {projects.map(project => (
@@ -195,26 +168,20 @@ const TeamPage = () => {
                     
                     {selectedProject ? (
                         <>
-                            <div>
+                            <div className="members-list">
                                 {members.length === 0 ? (
-                                    <p>Нет участников в этом проекте</p>
+                                    <p className="no-members">Нет участников в этом проекте</p>
                                 ) : (
                                     members.map(member => (
-                                        <div key={member.id || member.username} style={{ 
-                                            display: 'flex', 
-                                            justifyContent: 'space-between', 
-                                            alignItems: 'center',
-                                            padding: '10px',
-                                            borderBottom: '1px solid #ccc'
-                                        }}>
-                                            <div>
-                                                <strong>{member.username}</strong>
-                                                <br />
-                                                <small>Доступ: {member.root}</small>
+                                        <div key={member.id || member.username} className="member-item">
+                                            <div className="member-info">
+                                                <div className="member-username">{member.username}</div>
+                                                <div className="member-role">Роль: {member.root || 'VIEWER'}</div>
                                             </div>
                                             <button 
                                                 onClick={() => handleRemoveMember(member.username)}
                                                 disabled={loading}
+                                                className="remove-button"
                                             >
                                                 Удалить
                                             </button>
@@ -222,12 +189,16 @@ const TeamPage = () => {
                                     ))
                                 )}
                             </div>
-                            <button onClick={loadTeamMembers} disabled={loading}>
+                            <button 
+                                onClick={loadTeamMembers} 
+                                disabled={loading}
+                                className="refresh-button"
+                            >
                                 [Обновить список]
                             </button>
                         </>
                     ) : (
-                        <p>Выберите проект чтобы увидеть участников</p>
+                        <p className="select-project-hint">Выберите проект чтобы увидеть участников</p>
                     )}
                 </div>
             </div>

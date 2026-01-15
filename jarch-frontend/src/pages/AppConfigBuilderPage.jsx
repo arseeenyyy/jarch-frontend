@@ -43,7 +43,7 @@ const AppConfigBuilderPage = () => {
     };
 
     return (
-        <div>
+        <div className="config-builder-page">
             <div className="config-builder-controls">
                 <button 
                     onClick={() => setActiveTab('app')}
@@ -63,6 +63,7 @@ const AppConfigBuilderPage = () => {
                 <button 
                     onClick={downloadConfig}
                     disabled={activeTab === 'app' ? !appConfig : !entityConfig}
+                    className="download-button"
                 >
                     [Скачать {activeTab === 'app' ? 'app-config.json' : 'entity-config.json'}]
                 </button>

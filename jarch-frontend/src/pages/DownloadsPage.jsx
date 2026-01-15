@@ -5,6 +5,7 @@ const DownloadsPage = () => {
     const [saveName, setSaveName] = useState('');
     const [availableSaves, setAvailableSaves] = useState([]);
     const [downloadHistory, setDownloadHistory] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const savedHistory = localStorage.getItem('downloadHistory');
@@ -16,6 +17,7 @@ const DownloadsPage = () => {
     }, []);
 
     const loadAvailableSaves = async () => {
+        setLoading(true);
         try {
             const savesList = await saveService.getSaves();
             const formattedSaves = savesList.map(filename => {
@@ -30,11 +32,13 @@ const DownloadsPage = () => {
             setAvailableSaves(uniqueSaves);
         } catch (error) {
             console.error('Ошибка загрузки списка сохранений:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const downloadAsFile = (content, filename, contentType) => {
-        const blob = new Blob([JSON.stringify(content, null, 2)], { type: contentType });
+    const downloadAsFile = (content, filename) => {
+        const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -56,66 +60,54 @@ const DownloadsPage = () => {
     };
 
     const handleDownloadConfig = async () => {
-        if (!saveName) {
-            alert('Выберите сохранение');
-            return;
-        }
+        if (!saveName) return;
 
         try {
             const config = await saveService.downloadConfig(saveName);
-            downloadAsFile(config, `${saveName}_config.json`, 'application/json');
+            downloadAsFile(config, `${saveName}_config.json`);
             addToHistory(`Конфиг приложения: ${saveName}`);
-            alert('Конфигурация приложения скачана!');
         } catch (error) {
             console.error('Ошибка скачивания конфига:', error);
-            alert('Ошибка скачивания: ' + error.message);
         }
     };
 
     const handleDownloadEntity = async () => {
-        if (!saveName) {
-            alert('Выберите сохранение');
-            return;
-        }
+        if (!saveName) return;
 
         try {
             const config = await saveService.downloadEntity(saveName);
-            downloadAsFile(config, `${saveName}_entity.json`, 'application/json');
+            downloadAsFile(config, `${saveName}_entity.json`);
             addToHistory(`Конфиг сущностей: ${saveName}`);
-            alert('Конфигурация сущностей скачана!');
         } catch (error) {
             console.error('Ошибка скачивания сущностей:', error);
-            alert('Ошибка скачивания: ' + error.message);
         }
     };
 
     const handleDownloadBoth = async () => {
-        if (!saveName) {
-            alert('Выберите сохранение');
-            return;
-        }
+        if (!saveName) return;
 
         try {
             await handleDownloadConfig();
             setTimeout(() => handleDownloadEntity(), 300);
         } catch (error) {
-            alert('Ошибка скачивания: ' + error.message);
+            console.error('Ошибка скачивания:', error);
         }
     };
 
     return (
-        <div>
+        <div className="downloads-page">
             <h2>Загрузки конфигураций</h2>
 
-            <div>
-                <div>
+            <div className="downloads-content">
+                <div className="downloads-section">
                     <h3>Загрузить сохраненные конфигурации</h3>
                     
-                    <div>
+                    <div className="form-group">
                         <label>Выберите сохранение:</label>
                         <select 
                             value={saveName}
                             onChange={(e) => setSaveName(e.target.value)}
+                            className="saves-select"
                         >
                             <option value="">-- Выберите сохранение --</option>
                             {availableSaves.map((save, index) => (
@@ -126,35 +118,40 @@ const DownloadsPage = () => {
                         </select>
                     </div>
                     
-                    <div>
-                        <button onClick={handleDownloadBoth}>
+                    <div className="download-buttons">
+                        <button onClick={handleDownloadBoth} className="download-button">
                             [Загрузить оба файла]
                         </button>
-                        <div>
-                            <button onClick={handleDownloadConfig}>
+                        <div className="download-options">
+                            <button onClick={handleDownloadConfig} className="option-button">
                                 Только app-config.json
                             </button>
-                            <button onClick={handleDownloadEntity}>
+                            <button onClick={handleDownloadEntity} className="option-button">
                                 Только entity-config.json
                             </button>
                         </div>
                     </div>
                     
-                    <div>
-                        <button onClick={loadAvailableSaves}>
+                    <div className="refresh-section">
+                        <button onClick={loadAvailableSaves} disabled={loading} className="refresh-button">
                             [Обновить список сохранений]
                         </button>
                     </div>
                 </div>
 
-                <div>
+                <div className="history-section">
                     <h3>История загрузок</h3>
-                    <div>
-                        {downloadHistory.map((entry, index) => (
-                            <div key={index}>
-                                {entry.timestamp} - {entry.item}
-                            </div>
-                        ))}
+                    <div className="history-list">
+                        {downloadHistory.length === 0 ? (
+                            <p className="no-history">История загрузок пуста</p>
+                        ) : (
+                            downloadHistory.map((entry, index) => (
+                                <div key={index} className="history-item">
+                                    <span className="history-timestamp">{entry.timestamp}</span>
+                                    <span className="history-item-name">{entry.item}</span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

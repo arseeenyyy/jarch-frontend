@@ -1,4 +1,4 @@
-import { request, getHeaders, getToken } from './api';
+import { request, createEventSource, getHeaders, getToken } from './api';
 
 export const projectService = {
     async createProject(projectData) {
@@ -15,8 +15,14 @@ export const projectService = {
         });
     },
 
-    async getProject(id) {
-        return request(`/project?projectId=${id}`, {
+    async getJoinedProjects() {
+        return request('/project/joined', {
+            headers: getHeaders()
+        });
+    },
+
+    async getProject(projectName) {
+        return request(`/project?projectName=${encodeURIComponent(projectName)}`, {
             headers: getHeaders()
         });
     },
@@ -50,11 +56,15 @@ export const projectService = {
     },
 
     startGenerationStream(id, onLog, onZipReady) {
-        const eventSource = new EventSource(`http://localhost:8080/jarch/generate-project/stream/${id}?token=${encodeURIComponent(getToken())}`);
+        const eventSource = createEventSource(`/jarch/generate-project/stream/${id}`);
 
         eventSource.addEventListener("log", event => {
-            const data = JSON.parse(event.data);
-            if (onLog) onLog(data.level, data.message);
+            try {
+                const data = JSON.parse(event.data);
+                if (onLog) onLog(data.level, data.message);
+            } catch (e) {
+                if (onLog) onLog("ERROR", `Ошибка парсинга лога: ${e.message}`);
+            }
         });
 
         eventSource.addEventListener("zipReady", () => {
@@ -62,10 +72,15 @@ export const projectService = {
             eventSource.close();
         });
 
-        eventSource.addEventListener("error", () => {
+        eventSource.addEventListener("error", (event) => {
+            console.error('SSE error:', event);
             if (onLog) onLog("ERROR", "Ошибка соединения с SSE потоком");
             eventSource.close();
         });
+
+        eventSource.onopen = () => {
+            if (onLog) onLog("INFO", "Подключен к потоку генерации");
+        };
 
         return eventSource;
     }

@@ -19,7 +19,7 @@ const AuthPage = () => {
             ...formData,
             [e.target.name]: e.target.value
         });
-        setError(''); // Сбрасываем ошибку при изменении
+        setError('');
     };
 
     const handleSubmit = async (e) => {
@@ -37,9 +37,7 @@ const AuthPage = () => {
             
             if (token) {
                 authService.setToken(token);
-                // Принудительно обновляем состояние авторизации
                 window.dispatchEvent(new Event('authChange'));
-                // Перенаправляем на главную
                 navigate('/');
             } else {
                 throw new Error('Не удалось получить токен');
@@ -55,7 +53,7 @@ const AuthPage = () => {
     return (
         <div className="auth-page">
             <div className="auth-container">
-                <h2 className="brackets">{isLogin ? 'вход в систему' : 'регистрация'}</h2>
+                <h2 className="auth-title">{isLogin ? 'Вход в систему' : 'Регистрация'}</h2>
                 
                 {error && (
                     <div className="auth-error">
@@ -66,13 +64,13 @@ const AuthPage = () => {
                 <form onSubmit={handleSubmit} className="auth-form">
                     {!isLogin && (
                         <div className="form-group">
-                            <label>имя пользователя</label>
+                            <label>Имя пользователя</label>
                             <input
                                 type="text"
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
-                                placeholder="введите имя пользователя"
+                                placeholder="Введите имя пользователя"
                                 required
                                 disabled={loading}
                             />
@@ -80,26 +78,26 @@ const AuthPage = () => {
                     )}
                     
                     <div className="form-group">
-                        <label>email</label>
+                        <label>Email</label>
                         <input
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="введите email"
+                            placeholder="Введите email"
                             required
                             disabled={loading}
                         />
                     </div>
                     
                     <div className="form-group">
-                        <label>пароль</label>
+                        <label>Пароль</label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            placeholder="введите пароль"
+                            placeholder="Введите пароль"
                             required
                             disabled={loading}
                         />
@@ -107,20 +105,21 @@ const AuthPage = () => {
                     
                     <button 
                         type="submit" 
-                        className="primary"
+                        className="auth-submit-button"
                         disabled={loading}
                     >
-                        {loading ? 'загрузка...' : (isLogin ? 'войти' : 'зарегистрироваться')}
+                        {loading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
                     </button>
                 </form>
                 
-                <div className="auth-switch-container text-center">
+                <div className="auth-switch">
                     <button
                         type="button"
                         onClick={() => setIsLogin(!isLogin)}
                         disabled={loading}
+                        className="auth-switch-button"
                     >
-                        {isLogin ? 'нет аккаунта? зарегистрироваться' : 'уже есть аккаунт? войти'}
+                        {isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
                     </button>
                 </div>
             </div>

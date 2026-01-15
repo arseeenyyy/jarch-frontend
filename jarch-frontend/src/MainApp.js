@@ -24,8 +24,8 @@ function MainApp() {
                 return <ProjectsPage />;
             case 'team':
                 return <TeamPage />;
-            // case 'saves':
-            //     return <SavesPage />;
+            case 'saves':
+                return <SavesPage />;
             case 'downloads':
                 return <DownloadsPage />;
             case 'app-config': 

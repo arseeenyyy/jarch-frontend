@@ -37,7 +37,6 @@ const GenerationPage = () => {
             const projects = await projectService.getUserProjects();
             setOwnedProjects(projects);
         } catch (error) {
-            console.error('Ошибка загрузки проектов:', error);
             addLog("ERROR", "Ошибка загрузки проектов");
         } finally {
             setLoadingProjects(false);
@@ -51,7 +50,6 @@ const GenerationPage = () => {
             const saves = await saveService.getProjectSaves(selectedProject.name);
             setProjectSaves(saves);
         } catch (error) {
-            console.error('Ошибка загрузки сохранений проекта:', error);
             addLog("ERROR", "Ошибка загрузки сохранений проекта");
         }
     };
@@ -60,16 +58,10 @@ const GenerationPage = () => {
         if (!selectedProject) return;
         
         try {
-            console.log('Загрузка конфигурации проекта:', saveName);
-            console.log('Выбранный проект:', selectedProject.name);
-            
             const [entityConfigData, appConfigData] = await Promise.all([
                 saveService.downloadProjectEntity(saveName),
                 saveService.downloadProjectApp(saveName)
             ]);
-            
-            console.log('Entity конфигурация загружена:', entityConfigData);
-            console.log('App конфигурация загружена:', appConfigData);
             
             const entityBlob = new Blob([JSON.stringify(entityConfigData, null, 2)], { type: 'application/json' });
             const appBlob = new Blob([JSON.stringify(appConfigData, null, 2)], { type: 'application/json' });
@@ -80,11 +72,8 @@ const GenerationPage = () => {
             setEntityFile(entityFile);
             setAppFile(appFile);
             
-            console.log('Файлы созданы:', entityFile.name, appFile.name);
-            
             addLog("SUCCESS", `Загружены конфигурации проекта "${saveName}"`);
         } catch (error) {
-            console.error('Ошибка загрузки конфигурации:', error);
             addLog("ERROR", `Ошибка загрузки конфигурации: ${error.message}`);
         }
     };
@@ -204,7 +193,19 @@ const GenerationPage = () => {
                                 setEntityFile(null);
                             }}
                             disabled={loadingProjects || isGenerating}
-                            className="project-select"
+                            style={{
+                                width: '100%',
+                                background: 'transparent',
+                                border: 'none',
+                                borderBottom: '2px solid var(--color-border)',
+                                color: 'var(--color-text-primary)',
+                                fontFamily: 'var(--font-family-main)',
+                                fontSize: '1rem',
+                                padding: 'var(--spacing-sm) 0',
+                                marginBottom: 'var(--spacing-md)',
+                                outline: 'none',
+                                transition: 'all var(--transition-fast)'
+                            }}
                         >
                             <option value="">-- Выберите проект --</option>
                             {ownedProjects.map(project => (
@@ -255,7 +256,16 @@ const GenerationPage = () => {
                                     onChange={handleFileChange(setEntityFile)}
                                     required 
                                     disabled={isGenerating}
-                                    className="file-upload"
+                                    style={{
+                                        color: 'var(--color-text-primary)',
+                                        fontFamily: 'var(--font-family-main)',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        borderBottom: '2px solid var(--color-border)',
+                                        padding: 'var(--spacing-sm) 0',
+                                        width: '100%',
+                                        cursor: 'pointer'
+                                    }}
                                 />
                                 {entityFile && (
                                     <div className="file-selected">
@@ -273,7 +283,16 @@ const GenerationPage = () => {
                                     onChange={handleFileChange(setAppFile)}
                                     required 
                                     disabled={isGenerating}
-                                    className="file-upload"
+                                    style={{
+                                        color: 'var(--color-text-primary)',
+                                        fontFamily: 'var(--font-family-main)',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        borderBottom: '2px solid var(--color-border)',
+                                        padding: 'var(--spacing-sm) 0',
+                                        width: '100%',
+                                        cursor: 'pointer'
+                                    }}
                                 />
                                 {appFile && (
                                     <div className="file-selected">

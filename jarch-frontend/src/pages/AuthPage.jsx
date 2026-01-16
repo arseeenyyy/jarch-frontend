@@ -43,8 +43,7 @@ const AuthPage = () => {
                 throw new Error('Не удалось получить токен');
             }
         } catch (err) {
-            setError(err.message || 'Произошла ошибка');
-            console.error('Auth error:', err);
+            setError("Такого пользователя не существует");
         } finally {
             setLoading(false);
         }
@@ -52,19 +51,43 @@ const AuthPage = () => {
 
     return (
         <div className="auth-page">
-            <div className="auth-container">
-                <h2 className="auth-title">{isLogin ? 'Вход в систему' : 'Регистрация'}</h2>
+            <div className="auth-container" style={{ 
+                maxWidth: '400px',
+                padding: '30px 20px',
+                margin: '50px auto'
+            }}>
+                <h2 style={{ 
+                    textAlign: 'center',
+                    marginBottom: '20px',
+                    color: 'var(--color-text-primary)'
+                }}>
+                    {isLogin ? '[вход]' : '[регистрация]'}
+                </h2>
                 
                 {error && (
-                    <div className="auth-error">
+                    <div style={{ 
+                        backgroundColor: 'var(--color-error-bg)',
+                        color: 'var(--color-error)',
+                        padding: '10px',
+                        marginBottom: '15px',
+                        borderRadius: '2px',
+                        fontSize: '0.9rem'
+                    }}>
                         {error}
                     </div>
                 )}
                 
-                <form onSubmit={handleSubmit} className="auth-form">
+                <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
                     {!isLogin && (
-                        <div className="form-group">
-                            <label>Имя пользователя</label>
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ 
+                                display: 'block',
+                                color: 'var(--color-label)',
+                                fontSize: '0.9rem',
+                                marginBottom: '5px'
+                            }}>
+                                Имя пользователя
+                            </label>
                             <input
                                 type="text"
                                 name="username"
@@ -73,12 +96,29 @@ const AuthPage = () => {
                                 placeholder="Введите имя пользователя"
                                 required
                                 disabled={loading}
+                                style={{
+                                    width: '100%',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    borderBottom: '2px solid var(--color-border)',
+                                    color: 'var(--color-text-primary)',
+                                    fontFamily: 'var(--font-family-main)',
+                                    padding: '8px 0',
+                                    outline: 'none'
+                                }}
                             />
                         </div>
                     )}
                     
-                    <div className="form-group">
-                        <label>Email</label>
+                    <div style={{ marginBottom: '15px' }}>
+                        <label style={{ 
+                            display: 'block',
+                            color: 'var(--color-label)',
+                            fontSize: '0.9rem',
+                            marginBottom: '5px'
+                        }}>
+                            Email
+                        </label>
                         <input
                             type="email"
                             name="email"
@@ -87,11 +127,28 @@ const AuthPage = () => {
                             placeholder="Введите email"
                             required
                             disabled={loading}
+                            style={{
+                                width: '100%',
+                                background: 'transparent',
+                                border: 'none',
+                                borderBottom: '2px solid var(--color-border)',
+                                color: 'var(--color-text-primary)',
+                                fontFamily: 'var(--font-family-main)',
+                                padding: '8px 0',
+                                outline: 'none'
+                            }}
                         />
                     </div>
                     
-                    <div className="form-group">
-                        <label>Пароль</label>
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ 
+                            display: 'block',
+                            color: 'var(--color-label)',
+                            fontSize: '0.9rem',
+                            marginBottom: '5px'
+                        }}>
+                            Пароль
+                        </label>
                         <input
                             type="password"
                             name="password"
@@ -100,26 +157,70 @@ const AuthPage = () => {
                             placeholder="Введите пароль"
                             required
                             disabled={loading}
+                            style={{
+                                width: '100%',
+                                background: 'transparent',
+                                border: 'none',
+                                borderBottom: '2px solid var(--color-border)',
+                                color: 'var(--color-text-primary)',
+                                fontFamily: 'var(--font-family-main)',
+                                padding: '8px 0',
+                                outline: 'none'
+                            }}
                         />
                     </div>
                     
                     <button 
                         type="submit" 
-                        className="auth-submit-button"
                         disabled={loading}
+                        style={{
+                            display: 'block',
+                            margin: '0 auto',
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-button)',
+                            fontFamily: 'var(--font-family-main)',
+                            fontSize: '1rem',
+                            padding: '10px 20px',
+                            cursor: 'pointer',
+                            transition: 'all var(--transition-fast)'
+                        }}
+                        onMouseOver={(e) => {
+                            e.target.style.color = 'var(--color-button-hover)';
+                            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        }}
+                        onMouseOut={(e) => {
+                            e.target.style.color = 'var(--color-button)';
+                            e.target.style.backgroundColor = 'transparent';
+                        }}
                     >
-                        {loading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
+                        {loading ? 'Загрузка...' : (isLogin ? '[Войти]' : '[Зарегистрироваться]')}
                     </button>
                 </form>
                 
-                <div className="auth-switch">
+                <div style={{ textAlign: 'center', marginTop: '15px' }}>
                     <button
                         type="button"
                         onClick={() => setIsLogin(!isLogin)}
                         disabled={loading}
-                        className="auth-switch-button"
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-text-secondary)',
+                            fontFamily: 'var(--font-family-main)',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            padding: '5px 10px',
+                            transition: 'all var(--transition-fast)'
+                        }}
+                        onMouseOver={(e) => {
+                            e.target.style.color = 'var(--color-button-hover)';
+                        }}
+                        onMouseOut={(e) => {
+                            e.target.style.color = 'var(--color-text-secondary)';
+                        }}
                     >
-                        {isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
+                        {isLogin ? '[нет аккаунта? зарегистрироваться]' : '[уже есть аккаунт? войти]'}
                     </button>
                 </div>
             </div>

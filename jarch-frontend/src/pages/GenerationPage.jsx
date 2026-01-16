@@ -52,6 +52,7 @@ const GenerationPage = () => {
             setProjectSaves(saves);
         } catch (error) {
             console.error('Ошибка загрузки сохранений проекта:', error);
+            addLog("ERROR", "Ошибка загрузки сохранений проекта");
         }
     };
 
@@ -59,24 +60,32 @@ const GenerationPage = () => {
         if (!selectedProject) return;
         
         try {
-            const [appConfigData, entityConfigData] = await Promise.all([
-                saveService.downloadConfigByProject(selectedProject.name, saveName),
-                saveService.downloadEntityByProject(selectedProject.name, saveName)
+            console.log('Загрузка конфигурации проекта:', saveName);
+            console.log('Выбранный проект:', selectedProject.name);
+            
+            const [entityConfigData, appConfigData] = await Promise.all([
+                saveService.downloadProjectEntity(saveName),
+                saveService.downloadProjectApp(saveName)
             ]);
             
-            const appBlob = new Blob([JSON.stringify(appConfigData, null, 2)], { type: 'application/json' });
+            console.log('Entity конфигурация загружена:', entityConfigData);
+            console.log('App конфигурация загружена:', appConfigData);
+            
             const entityBlob = new Blob([JSON.stringify(entityConfigData, null, 2)], { type: 'application/json' });
+            const appBlob = new Blob([JSON.stringify(appConfigData, null, 2)], { type: 'application/json' });
             
-            const appFile = new File([appBlob], `${saveName}_app-config.json`, { type: 'application/json' });
             const entityFile = new File([entityBlob], `${saveName}_entity-config.json`, { type: 'application/json' });
+            const appFile = new File([appBlob], `${saveName}_app-config.json`, { type: 'application/json' });
             
-            setAppFile(appFile);
             setEntityFile(entityFile);
+            setAppFile(appFile);
             
-            addLog("SUCCESS", `Загружена конфигурация "${saveName}" из проекта`);
+            console.log('Файлы созданы:', entityFile.name, appFile.name);
+            
+            addLog("SUCCESS", `Загружены конфигурации проекта "${saveName}"`);
         } catch (error) {
             console.error('Ошибка загрузки конфигурации:', error);
-            addLog("ERROR", `Ошибка загрузки конфигурации`);
+            addLog("ERROR", `Ошибка загрузки конфигурации: ${error.message}`);
         }
     };
 
@@ -170,7 +179,7 @@ const GenerationPage = () => {
     };
 
     return (
-        <div>
+        <div className="generation-page">
             <h2>Генерация проекта</h2>
 
             <div className="generation-controls">
@@ -178,12 +187,6 @@ const GenerationPage = () => {
                     <button
                         onClick={() => setUseProjectConfigs(!useProjectConfigs)}
                         className="mode-toggle-button"
-                        style={{ 
-                            textAlign: 'left', 
-                            paddingLeft: '5px',
-                            marginBottom: 'var(--spacing-md)',
-                            background: useProjectConfigs ? 'rgba(90, 90, 138, 0.2)' : 'transparent'
-                        }}
                     >
                         {useProjectConfigs ? '[Использовать конфигурации проекта]' : '[Загрузить файлы вручную]'}
                     </button>
@@ -197,21 +200,11 @@ const GenerationPage = () => {
                                 const projectId = e.target.value;
                                 const project = ownedProjects.find(p => p.id.toString() === projectId);
                                 setSelectedProject(project || null);
+                                setAppFile(null);
+                                setEntityFile(null);
                             }}
                             disabled={loadingProjects || isGenerating}
-                            style={{
-                                width: '100%',
-                                background: 'transparent',
-                                border: 'none',
-                                borderBottom: '2px solid var(--color-border)',
-                                color: 'var(--color-text-primary)',
-                                fontFamily: 'var(--font-family-main)',
-                                fontSize: '1rem',
-                                padding: 'var(--spacing-sm) 0',
-                                marginBottom: 'var(--spacing-md)',
-                                outline: 'none',
-                                transition: 'all var(--transition-fast)'
-                            }}
+                            className="project-select"
                         >
                             <option value="">-- Выберите проект --</option>
                             {ownedProjects.map(project => (
@@ -223,26 +216,29 @@ const GenerationPage = () => {
                         
                         {selectedProject && projectSaves.length > 0 && (
                             <div className="project-saves-section">
+                                <h4>Доступные конфигурации:</h4>
                                 <div className="saves-list">
                                     {projectSaves.map((save, index) => (
                                         <div key={index} className="save-item">
-                                            <span className="save-name">{save}</span>
+                                            <span className="save-name">
+                                                {save}
+                                            </span>
                                             <button 
                                                 onClick={() => handleProjectConfigSelect(save)}
                                                 disabled={isGenerating}
                                                 className="action-button"
-                                                style={{
-                                                    padding: 'var(--spacing-xs) var(--spacing-sm)',
-                                                    fontSize: '0.9rem',
-                                                    textAlign: 'left',
-                                                    paddingLeft: '5px'
-                                                }}
                                             >
-                                                [Выбрать]
+                                                [Загрузить]
                                             </button>
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+                        )}
+                        
+                        {selectedProject && projectSaves.length === 0 && (
+                            <div className="no-saves-message">
+                                Нет сохраненных конфигураций для этого проекта
                             </div>
                         )}
                     </div>
@@ -250,59 +246,59 @@ const GenerationPage = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="file-inputs">
                             <div className="file-input">
+                                <div className="file-label">
+                                    Конфигурация сущностей (entity-config.json):
+                                </div>
                                 <input 
                                     type="file" 
                                     accept=".json" 
                                     onChange={handleFileChange(setEntityFile)}
                                     required 
                                     disabled={isGenerating}
-                                    style={{
-                                        color: 'var(--color-text-primary)',
-                                        fontFamily: 'var(--font-family-main)',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        borderBottom: '2px solid var(--color-border)',
-                                        padding: 'var(--spacing-sm) 0',
-                                        width: '100%',
-                                        marginBottom: 'var(--spacing-md)'
-                                    }}
+                                    className="file-upload"
                                 />
+                                {entityFile && (
+                                    <div className="file-selected">
+                                        ✓ {entityFile.name}
+                                    </div>
+                                )}
                             </div>
                             <div className="file-input">
+                                <div className="file-label">
+                                    Конфигурация приложения (app-config.json):
+                                </div>
                                 <input 
                                     type="file" 
                                     accept=".json" 
                                     onChange={handleFileChange(setAppFile)}
                                     required 
                                     disabled={isGenerating}
-                                    style={{
-                                        color: 'var(--color-text-primary)',
-                                        fontFamily: 'var(--font-family-main)',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        borderBottom: '2px solid var(--color-border)',
-                                        padding: 'var(--spacing-sm) 0',
-                                        width: '100%',
-                                        marginBottom: 'var(--spacing-md)'
-                                    }}
+                                    className="file-upload"
                                 />
+                                {appFile && (
+                                    <div className="file-selected">
+                                        ✓ {appFile.name}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </form>
                 )}
 
-                <button 
-                    onClick={handleSubmit} 
-                    disabled={isGenerating || (!entityFile || !appFile)}
-                    style={{
-                        display: "block",
-                        textAlign: "left",
-                        paddingLeft: "5px",
-                        marginTop: "var(--spacing-md)"
-                    }}
-                >
-                    {isGenerating ? '[Генерация...]' : '[Сгенерировать проект]'}
-                </button>
+                <div className="generation-status">
+                    {entityFile && appFile && (
+                        <div className="configs-loaded">
+                            ✓ Конфигурации загружены и готовы к генерации
+                        </div>
+                    )}
+                    <button 
+                        onClick={handleSubmit} 
+                        disabled={isGenerating || (!entityFile || !appFile)}
+                        className="generate-button"
+                    >
+                        {isGenerating ? '[Генерация...]' : '[Сгенерировать проект]'}
+                    </button>
+                </div>
             </div>
 
             <LogViewer logs={logs} />

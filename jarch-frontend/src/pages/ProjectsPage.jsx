@@ -107,11 +107,13 @@ const ProjectsPage = () => {
         
         try {
             const saves = await saveService.getProjectSaves(selectedProject.name);
-            setProjectSaves(saves);
+            // Фильтруем пустые значения
+            const filteredSaves = saves.filter(save => save && save.trim() !== '');
+            setProjectSaves(filteredSaves);
             
             setProjectsWithConfigs(prev => ({
                 ...prev,
-                [selectedProject.id]: saves.length > 0
+                [selectedProject.id]: filteredSaves.length > 0
             }));
         } catch (error) {
             console.error('Ошибка загрузки сохранений проекта:', error);
@@ -212,7 +214,7 @@ const ProjectsPage = () => {
             return;
         }
         
-        const fileName = `${selectedProject.name}_config`;
+        const projectName = selectedProject.name;
         
         setLoading(true);
         setError('');
@@ -220,31 +222,40 @@ const ProjectsPage = () => {
         
         try {
             const formData = new FormData();
-            formData.append('projectName', selectedProject.name);
-            formData.append('saveName', fileName);
+            formData.append('projectName', projectName);
             
-            const appConfigBlob = new Blob([JSON.stringify(appConfig)], { type: 'application/json' });
-            const entityConfigBlob = new Blob([JSON.stringify(entityConfig)], { type: 'application/json' });
+            const appConfigBlob = new Blob([JSON.stringify(appConfig, null, 2)], { type: 'application/json' });
+            const entityConfigBlob = new Blob([JSON.stringify(entityConfig, null, 2)], { type: 'application/json' });
             
             formData.append('appConfig', appConfigBlob, 'app-config.json');
             formData.append('entityConfig', entityConfigBlob, 'entity-config.json');
             
             await saveService.saveToProject(formData);
             
-            setSuccess(`Конфигурация "${fileName}" сохранена в проект`);
+            setSuccess(`Конфигурации сохранены в проект "${selectedProject.name}"`);
             
             setProjectsWithConfigs(prev => ({
                 ...prev,
                 [selectedProject.id]: true
             }));
             
-            loadProjectSaves();
+            // Обновляем список сохранений
+            await loadProjectSaves();
+            
+            // Сбрасываем конфигурации после сохранения
+            setAppConfig(null);
+            setEntityConfig(null);
+            setAppConfigValid(false);
+            setEntityConfigValid(false);
+            
         } catch (error) {
-            setError('Ошибка сохранения конфигурации');
+            console.error('Ошибка сохранения конфигурации:', error);
+            setError('Ошибка сохранения конфигурации: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
+
     
     const handleDownloadConfig = () => {
         if (!areConfigsValid) {
@@ -257,6 +268,9 @@ const ProjectsPage = () => {
             fileName = selectedProject.name;
         }
         
+        const timestamp = new Date().toISOString().split('T')[0];
+        const downloadName = `${fileName}_${timestamp}`;
+        
         if (appConfig) {
             const appBlob = new Blob([JSON.stringify(appConfig, null, 2)], { 
                 type: 'application/json' 
@@ -264,7 +278,7 @@ const ProjectsPage = () => {
             const appUrl = URL.createObjectURL(appBlob);
             const appLink = document.createElement('a');
             appLink.href = appUrl;
-            appLink.download = `${fileName}_app-config.json`;
+            appLink.download = `${downloadName}_app-config.json`;
             appLink.click();
             URL.revokeObjectURL(appUrl);
         }
@@ -277,7 +291,7 @@ const ProjectsPage = () => {
                 const entityUrl = URL.createObjectURL(entityBlob);
                 const entityLink = document.createElement('a');
                 entityLink.href = entityUrl;
-                entityLink.download = `${fileName}_entity-config.json`;
+                entityLink.download = `${downloadName}_entity-config.json`;
                 entityLink.click();
                 URL.revokeObjectURL(entityUrl);
             }, 100);
@@ -293,36 +307,40 @@ const ProjectsPage = () => {
         }
         
         try {
-            const [appConfigData, entityConfigData] = await Promise.all([
-                saveService.downloadConfigByProject(selectedProject.name, saveName),
-                saveService.downloadEntityByProject(selectedProject.name, saveName)
+            console.log('Скачивание конфигурации проекта:', saveName);
+            
+            // Формат файлов: projectName_entity.json и projectName_app.json
+            const [entityConfigData, appConfigData] = await Promise.all([
+                saveService.downloadProjectEntity(saveName),
+                saveService.downloadProjectApp(saveName)
             ]);
             
-            const appBlob = new Blob([JSON.stringify(appConfigData, null, 2)], { type: 'application/json' });
             const entityBlob = new Blob([JSON.stringify(entityConfigData, null, 2)], { type: 'application/json' });
+            const appBlob = new Blob([JSON.stringify(appConfigData, null, 2)], { type: 'application/json' });
             
-            const appUrl = URL.createObjectURL(appBlob);
             const entityUrl = URL.createObjectURL(entityBlob);
-            
-            const appLink = document.createElement('a');
-            appLink.href = appUrl;
-            appLink.download = `${saveName}_app-config.json`;
+            const appUrl = URL.createObjectURL(appBlob);
             
             const entityLink = document.createElement('a');
             entityLink.href = entityUrl;
             entityLink.download = `${saveName}_entity-config.json`;
             
-            appLink.click();
-            setTimeout(() => entityLink.click(), 100);
+            const appLink = document.createElement('a');
+            appLink.href = appUrl;
+            appLink.download = `${saveName}_app-config.json`;
+            
+            entityLink.click();
+            setTimeout(() => appLink.click(), 100);
             
             setTimeout(() => {
-                URL.revokeObjectURL(appUrl);
                 URL.revokeObjectURL(entityUrl);
+                URL.revokeObjectURL(appUrl);
             }, 1000);
             
             setSuccess(`Конфигурация "${saveName}" скачана`);
         } catch (error) {
-            setError('Ошибка скачивания конфигурации');
+            console.error('Ошибка скачивания:', error);
+            setError('Ошибка скачивания конфигурации: ' + error.message);
         }
     };
     
@@ -332,9 +350,8 @@ const ProjectsPage = () => {
                 <button 
                     onClick={() => setShowCreateForm(!showCreateForm)}
                     className="toggle-form-button"
-                    style={{ textAlign: 'left', paddingLeft: '5px' }}
                 >
-                    {showCreateForm ? '[Скрыть]' : '[Создать проект]'}
+                    {showCreateForm ? '[Скрыть форму создания]' : '[Создать новый проект]'}
                 </button>
                 
                 {showCreateForm && (
@@ -364,9 +381,8 @@ const ProjectsPage = () => {
                             type="submit"
                             disabled={loading}
                             className="submit-button"
-                            style={{ textAlign: 'left', paddingLeft: '5px' }}
                         >
-                            {loading ? '[Создание...]' : '[Создать]'}
+                            {loading ? '[Создание...]' : '[Создать проект]'}
                         </button>
                     </form>
                 )}
@@ -377,78 +393,80 @@ const ProjectsPage = () => {
                 
                 <div className="projects-grid">
                     {ownedProjects.length === 0 && joinedProjects.length === 0 ? (
-                        <p className="no-projects">
-                            У вас еще нет проектов
-                        </p>
+                        <div className="no-projects">
+                            У вас еще нет проектов. Создайте первый проект!
+                        </div>
                     ) : (
                         <>
-                            {ownedProjects.map(project => {
-                                const hasConfig = projectsWithConfigs[project.id] || false;
-                                return (
-                                    <div 
-                                        key={project.id} 
-                                        className={`project-card ${selectedProject?.id === project.id ? 'selected' : ''}`}
-                                        onClick={() => {
-                                            setSelectedProject(project);
-                                            if (activeSection === 'team') {
-                                                loadTeamMembers();
-                                            }
-                                            if (activeSection === 'config-builder') {
-                                                loadProjectSaves();
-                                            }
-                                        }}
-                                    >
-                                        <h4 className="project-title">
-                                            {project.name}
-                                        </h4>
-                                        <p className="project-description">
-                                            {project.description || 'Без описания'}
-                                        </p>
-                                        <div className="project-footer">
-                                            <span className="project-badge owner">
-                                                Владелец
-                                            </span>
-                                            <span className="project-config-status">
-                                                {hasConfig ? '✅' : '❌'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                            {ownedProjects.length > 0 && (
+                                <div className="owned-projects-section">
+                                    <h4>Проекты, которыми вы владеете:</h4>
+                                    {ownedProjects.map(project => {
+                                        const hasConfig = projectsWithConfigs[project.id] || false;
+                                        return (
+                                            <div 
+                                                key={project.id} 
+                                                className={`project-card ${selectedProject?.id === project.id ? 'selected' : ''}`}
+                                                onClick={() => {
+                                                    setSelectedProject(project);
+                                                }}
+                                            >
+                                                <div className="project-card-header">
+                                                    <h4 className="project-title">
+                                                        {project.name}
+                                                    </h4>
+                                                    <span className="project-badge owner">
+                                                        Владелец
+                                                    </span>
+                                                </div>
+                                                <p className="project-description">
+                                                    {project.description || 'Без описания'}
+                                                </p>
+                                                <div className="project-footer">
+                                                    <span className="project-config-status">
+                                                        {hasConfig ? '✅ Конфигурации' : '❌ Нет конфигураций'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                             
-                            {joinedProjects.map(project => {
-                                const hasConfig = projectsWithConfigs[project.id] || false;
-                                return (
-                                    <div 
-                                        key={project.id} 
-                                        className={`project-card ${selectedProject?.id === project.id ? 'selected' : ''}`}
-                                        onClick={() => {
-                                            setSelectedProject(project);
-                                            if (activeSection === 'team') {
-                                                loadTeamMembers();
-                                            }
-                                            if (activeSection === 'config-builder') {
-                                                loadProjectSaves();
-                                            }
-                                        }}
-                                    >
-                                        <h4 className="project-title">
-                                            {project.name}
-                                        </h4>
-                                        <p className="project-description">
-                                            {project.description || 'Без описания'}
-                                        </p>
-                                        <div className="project-footer">
-                                            <span className="project-badge member">
-                                                Участник
-                                            </span>
-                                            <span className="project-config-status">
-                                                {hasConfig ? '✅' : '❌'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                            {joinedProjects.length > 0 && (
+                                <div className="joined-projects-section">
+                                    <h4>Проекты, в которых вы участвуете:</h4>
+                                    {joinedProjects.map(project => {
+                                        const hasConfig = projectsWithConfigs[project.id] || false;
+                                        return (
+                                            <div 
+                                                key={project.id} 
+                                                className={`project-card ${selectedProject?.id === project.id ? 'selected' : ''}`}
+                                                onClick={() => {
+                                                    setSelectedProject(project);
+                                                }}
+                                            >
+                                                <div className="project-card-header">
+                                                    <h4 className="project-title">
+                                                        {project.name}
+                                                    </h4>
+                                                    <span className="project-badge member">
+                                                        Участник
+                                                    </span>
+                                                </div>
+                                                <p className="project-description">
+                                                    {project.description || 'Без описания'}
+                                                </p>
+                                                <div className="project-footer">
+                                                    <span className="project-config-status">
+                                                        {hasConfig ? '✅ Конфигурации' : '❌ Нет конфигураций'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
@@ -491,7 +509,6 @@ const ProjectsPage = () => {
                                 type="submit" 
                                 disabled={loading}
                                 className="submit-button"
-                                style={{ textAlign: 'left', paddingLeft: '5px' }}
                             >
                                 {loading ? '[Добавление...]' : '[Добавить в команду]'}
                             </button>
@@ -515,7 +532,6 @@ const ProjectsPage = () => {
                                             onClick={() => handleRemoveMember(member.username)}
                                             disabled={loading}
                                             className="remove-button"
-                                            style={{ padding: '2px 8px', fontSize: '0.9rem' }}
                                         >
                                             Удалить
                                         </button>
@@ -538,9 +554,8 @@ const ProjectsPage = () => {
                             onClick={handleDownloadConfig}
                             disabled={!areConfigsValid || loading}
                             className="download-button"
-                            style={{ textAlign: 'left', paddingLeft: '5px' }}
                         >
-                            {loading ? '[Загрузка...]' : '[Скачать]'}
+                            {loading ? '[Загрузка...]' : '[Скачать конфигурации]'}
                         </button>
                         
                         {selectedProject && (
@@ -548,7 +563,6 @@ const ProjectsPage = () => {
                                 onClick={handleSaveToProject}
                                 disabled={!areConfigsValid || loading}
                                 className="save-project-button"
-                                style={{ textAlign: 'left', paddingLeft: '5px' }}
                             >
                                 {loading ? '[Сохранение...]' : '[Сохранить в проект]'}
                             </button>
@@ -568,7 +582,6 @@ const ProjectsPage = () => {
                                         onClick={() => handleDownloadFromProject(save)}
                                         disabled={loading}
                                         className="action-button"
-                                        style={{ padding: '2px 8px', fontSize: '0.9rem' }}
                                     >
                                         Скачать
                                     </button>

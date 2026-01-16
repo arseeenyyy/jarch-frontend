@@ -33,14 +33,18 @@ export const saveService = {
         });
     },
 
-    async downloadConfigByProject(projectName, saveName) {
-        return request(`/jarch/download-config-file/${projectName}/${saveName}`, {
+    async downloadProjectEntity(projectName) {
+        console.log('Скачиваю entity для проекта:', projectName);
+        const fileName = `${projectName}_entity.json`;
+        return request(`/jarch/download-project-entity/${projectName}`, {
             headers: getHeaders()
         });
     },
 
-    async downloadEntityByProject(projectName, saveName) {
-        return request(`/jarch/download-entity-file/${projectName}/${saveName}`, {
+    async downloadProjectApp(projectName) {
+        console.log('Скачиваю app для проекта:', projectName);
+        const fileName = `${projectName}_app.json`;
+        return request(`/jarch/download-project-app/${projectName}`, {
             headers: getHeaders()
         });
     }

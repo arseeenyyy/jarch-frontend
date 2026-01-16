@@ -989,20 +989,6 @@ header {
     position: relative;
 }
 
-.logout-button {
-    position: fixed;
-    bottom: var(--spacing-lg);
-    right: var(--spacing-lg);
-    z-index: 100;
-    background-color: var(--color-bg-card);
-    border: 2px solid var(--color-border);
-    padding: var(--spacing-sm) var(--spacing-md);
-}
-
-.logout-button:hover {
-    border-color: var(--color-error);
-    color: var(--color-error);
-}
 
 /* Стили для input file */
 input[type="file"]::-webkit-file-upload-button {
